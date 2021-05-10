@@ -1,0 +1,17 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+	"numpy",
+	"opencv",
+	"imutils",
+	"dlib",
+	"pyqt5",
+	"skimage",
+	"matplotlib",
+	"os",
+	"ctypes",
+	"time",
+	"filterpy"
+]
+build-backend = "setuptools.build_meta"
