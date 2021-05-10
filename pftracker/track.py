@@ -1,0 +1,368 @@
+"""
+This module implements top-level of pftracker module. 
+
+@author: Bessie Domínguez-Dáger
+"""
+
+import numpy as np
+from pftracker.modules.metrics.plotError import plotE, plotE_average
+from pftracker.modules.interfacingUI import particle_tracker
+
+class Track():
+    """
+    Track class provides top-level of pftracker module for user
+    handeling. Here are defined all the particle filter parameters
+    and target model specifications for perfoming the task of face
+    traking in video sequences.
+           
+    Args:
+       video(str, optional): Path to the input video file 
+           (.mp4 or .avi format). Default is the reference
+           to the webcam (None)
+       algorithm(str, optional): Particle filter algorithm. Default
+           is 'G_PF'        
+       n_particles(int, optional): Number of particles. Default is 100
+       detector(str, optional): Face detector algorithm. Default is
+           'CaffeModel'
+       estimate(str, optional): Estimate method. Default is 'weighted_mean'
+       resample(str, optional): Resampling method. Default is 'systematic'
+       resamplePercent(int, optional): Resampling percent. Default is 50
+       robustPercent(int, optional): Resampling percent. Default is 20
+       obsmodel(str, optional): Observation model. Default is 'HSV color-based'
+       stateSpace(str, optional): State space model. Default is 'dynamic_bbox'
+                  
+    Supported PF algorithms:
+        - 'SIS': Sequential Importance Sampling filter
+        - 'SIR': Sequential Importance Resampling filter
+        - 'G_PF': Generic particle filter
+        - 'APF': Auxilliary particle filter
+    
+    Supported Face detectors:
+        - 'HaarCascade': Viola and Jones (V&J) detector 
+        - 'CaffeModel': Single Shot Detector (SSD) 
+        - 'dlib': Histogram of Oriented Gradient (HOG) 
+    
+    Supported estimate methods:    
+        - 'weighted_mean': Weighted mean method
+        - 'MAP': Maximum weight method
+        - 'robust_mean': Robust mean method  
+    
+    Supported resampling methods:
+        - 'systematic': Systematic resampling
+        - 'stratified': Stratified resampling
+        - 'residual': Residual resampling
+        - 'multinomial': Multinomial resampling
+    
+    Supported observation models: 
+        - 'HSV color-based': Color model for weighing the particles  
+        - 'LBP-based': Texture model for weighing the particles
+                  
+    Supported state space models:
+        - 'dynamic_bbox': Self updating bounding box model
+        - '5_variables': Five variables state space model
+        - '6_variables': Six variables state space model   
+
+    Example:
+        
+        First construct the object and defined input video, filter parameters and 
+        target model if you want options other than the default ones.
+    
+        .. code::
+    
+            from pftracker.track import Track
+            pf = Track(video="pftracker\input\Aaron_Guiel\Aaron_Guiel5.avi")
+        
+        Then run the algorithm with the previous definitions and specifying 
+        the number of algorihm iterations and ground truth file is you want to
+        calculate precision and recall error metrics. Specify errorFile,
+        saveTrackFile and saveVideo for saving error, estimates and resulting
+        video files.
+        
+        .. code::
+            
+            pf.run(iterations=2, 
+                   gt="pftracker\input\Aaron_Guiel\Aaron_Guiel5.labeled_faces.txt",
+                   pf_tracker(saveVideo="pftracker\output\pf_error.txt"))
+        
+        After that you are going to see the face tracking performing over the
+        selected input video.
+        
+        If you want to plot the precision and recall metrics per frame (and per
+        iteration in case of you have more than one) and you provided the
+        ground truth file previously, then you can run:
+        
+        .. code::
+            
+            pf.plotError()    
+    """
+    def __init__(self, video=None, 
+                 algorithm="G_PF", n_particles=100, 
+                 detector="CaffeModel", estimate="weighted_mean", 
+                 resample="systematic", resamplePercent=50, 
+                 robustPercent=20, obsmodel="HSV color-based", 
+                 stateSpace="dynamic_bbox"):            
+        # Filter parameters
+        self.algorithm = algorithm 
+        self.n_particles = n_particles         
+        self.detector = detector
+        self.estimate = estimate        
+        self.resample = resample
+        self.resamplePercent = resamplePercent        
+        self.robustPercent = robustPercent   
+        
+        # Target model parameters
+        self.obsmodel = obsmodel
+        self.stateSpace = stateSpace
+        
+        # Input Video
+        self.video = video
+
+        
+    def run(self, iterations=10, gt=None, errorFile=None, 
+            saveTrackFile=None, saveVideo=None): 
+        """
+        Perform the face tracking based on particle filter.
+        
+        Args:
+            iterations(int, optional): Number of algorithm iterations. 
+                Default is 10. 
+                If the input video is the reference to the webcam then
+                the video is recorded just once and therefore the algorithm
+                iterations are always equal to 1.
+            gt(str, optional): Path to the ground truth file. Without this
+                file is not posible to calculate precision and recall error
+                metrics. Default is None
+            errorFile(str, optional): Path to a .txt file for saving precision
+                and recall error metrics. Default is None (do not save error).
+                
+                **Example**
+                
+                .. code::
+                    
+                    pf_tracker(saveVideo="pftracker\output\pf_error.txt")
+                    
+                In case of the number of iterations is greater than 1, the
+                errors of each tracking iteration are saved in the same
+                .txt file separated by a blank line. Besides, average precision, 
+                recall, elapsed time and fps per iteration are going to be 
+                saved at the end of the file.
+            saveTrackFile(str, optional): Path to the estimate .txt file.
+                Default is None (do not save estimates).
+                
+                **Example**
+                
+                .. code::
+                    
+                    pf_tracker(saveVideo="pftracker\output\pf_estimates.txt")
+                    
+                In case of the number of iterations is greater than 1, all the
+                estimates of each tracking iteration are saved in the same
+                .txt file separated by a blank line.
+            saveVideo(str, optional): Path to the output video file.                                
+                Default is None (do not save video).
+                Always the output file is a .avi format, so please specify 
+                this format when write the path. 
+                
+                **Example**
+                
+                .. code::
+                    
+                    pf_tracker(saveVideo="pftracker\output\pf_output.avi")
+                    
+                In case of the number of iterations is greater than 1 and you
+                want to save all the resulting videos from tracking, you just
+                have to specify one name for a video file as explain before 
+                and the number of the iteration is going to be added 
+                automatically to that name.
+                
+                **Example**                
+                
+                If you run the command:
+                            
+                .. code::    
+                            
+                    pf_tracker(2, saveVideo="pftracker\output\pf_output.avi")
+                        
+                The resulting video file names are:
+                    
+                pf_output0001.avi
+                
+                pf_output0002.avi 
+        """
+        i = iterations
+        self.ii = iterations
+        t, fps = 0, 0
+        self.P, self.R, self.P_mean, self.R_mean = 0,0,0,0
+        P_std_perFrame, R_std_perFrame = 0.0, 0.0
+        self.P_array = np.zeros((i,1))
+        self.R_array = np.zeros((i,1))
+        P_std_array = np.zeros((i,1))
+        R_std_array = np.zeros((i,1))
+        t_array = np.zeros((i,1))
+        fps_array = np.zeros((i,1))
+        idx = 0
+            
+        pf = particle_tracker(video = self.video, algorithm = self.algorithm,
+                              n_particles = self.n_particles, detector = self.detector,
+                              estimate = self.estimate, resample = self.resample, 
+                              resamplePercent = self.resamplePercent, 
+                              robustPercent = self.robustPercent, 
+                              obsmodel = self.obsmodel, stateSpace = self.stateSpace)
+        
+        if saveTrackFile != None:
+            error_text = ("Path to the estimates file should contain the "
+                          ".txt extension at the end.\n"
+                          "\tExample: pf_tracker(saveVideo=\"pftracker"
+                          "\output\pf_estimates.txt\")")                              
+            assert "txt" == errorFile.split(".")[-1], error_text
+         
+        if saveVideo != None and self.ii != 1:
+            error_text = ("Path to the output video file should contain "
+                          "the .avi extension at the end.\n"
+                          "\tExample: pf_tracker(saveVideo=\"pftracker"
+                          "\output\pf_output.txt\")")                              
+            assert "avi" == errorFile.split(".")[-1], error_text
+        
+        # Perform face tracking on webcam video        
+        if self.video == None:            
+            pf.face_tracking(saveVideo)
+            
+            # Save pf estimates
+            if saveTrackFile != None:
+                pf.save_estimation(saveTrackFile)
+                
+        # Perform face tracking on video file     
+        else: 
+            if errorFile != None:
+                # Open .txt error file
+                error_text = ("Path to the error file should contain the "
+                              ".txt extension at the end.\n"
+                              "\tExample: pf_tracker(saveVideo=\"pftracker"
+                              "\output\pf_error.txt\")")                              
+                assert "txt" == errorFile.split(".")[-1], error_text                    
+                error_output = open(errorFile,"w")
+                
+            if saveTrackFile != None:
+                est_output = open(saveTrackFile,"w")
+            
+            if saveVideo != None and self.ii != 1:
+                saveVideo = saveVideo.split(".avi")[:-1][0]
+            else:
+                video_output = saveVideo
+            
+            while (i > 0):
+                print ("Run: {}".format(idx+1))
+                
+                if saveVideo != None and self.ii != 1:
+                    video_output = saveVideo + "{}.avi".format(str(idx+1).zfill(4))
+                
+                try:
+                    t_i, fps_i = pf.face_tracking(video_output)                     
+            
+                except AssertionError as faceDetect_error:    
+                    print(faceDetect_error.args[0])
+
+                else:                
+                    t += t_i
+                    fps += fps_i
+                    t_array[idx] = t_i
+                    fps_array[idx] = fps_i
+                    
+                    if gt != None:
+                        P_i, R_i,P_mean_i,R_mean_i,P_std_i,R_std_i = pf.eval_pf(gt)
+                        
+                        try:
+                            self.P += P_i
+                        except ValueError:
+                            break
+                        else:
+                            self.R += R_i
+                                               
+                            self.P_array[idx] = P_mean_i
+                            self.R_array[idx] = R_mean_i
+                            P_std_array[idx] = P_std_i
+                            R_std_array[idx] = R_std_i
+                            
+                            P_std_perFrame += P_std_i
+                            R_std_perFrame += R_std_i
+                        
+                            print("[INFO] approx. precision: {:.2f} +- {:.2f}"
+                                  .format(P_mean_i, P_std_i))
+                            print("[INFO] approx. recall: {:.2f} +- {:.2f}"
+                                  .format(R_mean_i, R_std_i))
+                            
+                            if errorFile != None:
+                                # Write tracking error as P R          
+                                for pt in zip(P_i, R_i):            
+                                    error_output.write("%.2f %.2f \n" % pt)         
+                                error_output.write("\n")
+                    
+                    if saveTrackFile != None:
+                        track = pf.get_pf_est()
+                        # Write track points as x, y, w, w          
+                        for pt in track:            
+                            est_output.write("%.2f %.2f %.2f %.2f \n" % pt) 
+                        est_output.write("\n")
+                
+                    i -= 1
+                    idx += 1
+            
+            if gt != None and errorFile != None:
+                error_output.write("Average precision, recall, elapsed time and "
+                             "fps per iteration:\n")
+                for pt in zip(self.P_array, P_std_array, self.R_array, R_std_array, t_array, fps_array):            
+                    error_output.write("%.2f+-%.2f %.2f+-%.2f %.2f %.2f \n" % pt)     
+            
+            if errorFile != None:
+                # Close output file
+                error_output.close()
+            
+            if saveTrackFile != None:
+                # Close output file
+                est_output.close()
+            
+            if self.ii == 1:
+                self.P_mean = P_mean_i
+                self.R_mean = R_mean_i
+            else:
+                t /= self.ii
+                fps /= self.ii
+                
+                print("\nTotal of runs: {}".format(idx))
+                print("Average time (sec): {:.2f}".format(t))
+                print("Average fps: {:.2f}".format(fps))
+                
+                if gt != None:
+                    #precision and recall per iteration
+                    self.P /= self.ii
+                    self.R /= self.ii
+                    
+                    # precision and recall standard deviation
+                    P_std = np.std(self.P_array, dtype=np.float64)
+                    R_std = np.std(self.R_array, dtype=np.float64)
+                    
+                    # precision and recall standard deviation
+                    P_std_perFrame /= self.ii
+                    R_std_perFrame /= self.ii
+                    
+                    self.P_mean = sum(self.P)/len(self.P)
+                    self.R_mean = sum(self.R)/len(self.R)       
+                
+                    print("Average precision +- std per frame/iteration: "
+                          "{:.2f} +- {:.2f}/{:.3f}"
+                          .format(self.P_mean, P_std_perFrame, P_std))
+                    print("Average recall +- std per frame/iteration: "
+                          "{:.2f} +- {:.2f}/{:.3f}"
+                          .format(self.R_mean, R_std_perFrame, R_std))
+                    
+
+    def plotError(self):
+        try:
+            # plot error
+            plotE(self.P, self.R, self.P_mean, self.R_mean)
+            if self.ii != 1:
+                plotE_average(self.P_array, self.R_array, self.P_mean, self.R_mean)
+        except TypeError:
+            print("There is no ground truth file provided for ploting "
+                  "precision and recall error metrics.")
+        

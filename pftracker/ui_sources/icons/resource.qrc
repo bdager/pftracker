@@ -1,0 +1,26 @@
+<RCC>
+  <qresource prefix="/icons">
+    <file>run_transp.png</file>
+    <file>cerrar_t.PNG</file>
+    <file>Descargados/892663.svg</file>
+    <file>Descargados/close (1).svg</file>
+    <file>Descargados/close (2).svg</file>
+    <file>Descargados/close (3).svg</file>
+    <file>Descargados/close.eps</file>
+    <file>Descargados/close.svg</file>
+    <file>Descargados/gray_icon.png</file>
+    <file>Descargados/green_icon.png</file>
+    <file>Descargados/icons8-checkmark (1).svg</file>
+    <file>Descargados/icons8-checkmark.svg</file>
+    <file>Descargados/icons8-checkmark-40.png</file>
+    <file>Descargados/icons8-checkmark-48.png</file>
+    <file>Descargados/icons8-ok.svg</file>
+    <file>Descargados/close (1).svg</file>
+    <file>PFT.PNG</file>
+    <file>cerrar.PNG</file>
+    <file>icon-fail.png</file>
+    <file>run3.PNG</file>
+    <file>run_grey.PNG</file>
+    <file>cerrar_grey.PNG</file>
+  </qresource>
+</RCC>

@@ -1,0 +1,11 @@
+numpy
+opencv
+imutils
+dlib
+pyqt5
+skimage
+matplotlib
+os
+ctypes
+time
+filterpy
