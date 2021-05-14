@@ -58,9 +58,6 @@ you can run the graphical interface since the command prompt or a python virtual
 
     [python interpreter] trackUI.py
 
-.. And the output is:
-
-.. ![Main window of the graphical interface](./docs/source/_static/Capture2.PNG)
 
 ## Requirements
 
