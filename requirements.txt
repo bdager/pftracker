@@ -1,11 +1,8 @@
 numpy
-opencv
+opencv-python
 imutils
-dlib
+dlib == 19.8.1
 pyqt5
-skimage
+scikit-image >= 0.13.1
 matplotlib
-os
-ctypes
-time
 filterpy
