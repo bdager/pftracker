@@ -36,8 +36,6 @@ the subject, to easily use these tools and quickly compare their results.
 
 The package is hosted on PyPI, so the most easy installation is using pip:
 
-::
-
 	pip install pftracker
 
 **Via Github**
