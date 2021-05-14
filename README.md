@@ -57,7 +57,10 @@ Once you have the pftracker installed and the trackUI.py in the same directory o
 you can run the graphical interface since the command prompt or a python virtual enviroment or shell by:
 
     [python interpreter] trackUI.py
-	
+
+And the output is:
+
+![Main window of the graphical interface](./docs/source/_static/Capture2.PNG)
 
 ## Requirements
 
