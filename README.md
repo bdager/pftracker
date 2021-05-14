@@ -46,8 +46,6 @@ https://github.com/bdager/pftraker
 
 For this you can do:
 
-::
-
     cd <directory you want to install to>
     git clone http://github.com/bdager/pftraker
     python setup.py install
@@ -57,8 +55,6 @@ In the GitHub repository there is a file trackUI.py, this file runs the pftracke
 as a graphical interface. 
 Once you have the pftracker installed and the trackUI.py in the same directory of the package, 
 you can run the graphical interface since the command prompt or a python virtual enviroment or shell by:
-
-::
 
     [python interpreter] trackUI.py
 	
@@ -72,9 +68,7 @@ dlib, scikit-image, Matplotlib, FilterPy and Python 3.6.
         
 First construct the object and defined input video, filter parameters and 
 target model if you want options other than the default ones.
-    
-.. code-block:: python
-    
+
     from pftracker.track import Track
     pf = Track(video="pftracker\input\Aaron_Guiel\Aaron_Guiel5.avi")
         
@@ -83,9 +77,7 @@ the number of algorihm iterations and ground truth file is you want to
 calculate precision and recall error metrics. Specify errorFile,
 saveTrackFile and saveVideo for saving error, estimates and resulting
 video files.
-        
-.. code-block:: python
-            
+                  
     pf.run(iterations=2, 
             gt="pftracker\input\Aaron_Guiel\Aaron_Guiel5.labeled_faces.txt",
             pf_tracker(saveVideo="pftracker\output\pf_error.txt"))
@@ -96,9 +88,7 @@ selected input video.
 If you want to plot the precision and recall metrics per frame (and per
 iteration in case of you have more than one) and you provided the
 ground truth file previously, then you can run:
-        
-.. code-block:: python
-            
+
     pf.plotError()    
 
 
