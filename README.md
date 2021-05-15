@@ -42,12 +42,12 @@ The package is hosted on PyPI, so the most easy installation is using pip:
 
 You also can obtain the code by getting it from the GitHub repository:
 
-https://github.com/bdager/pftraker
+https://github.com/bdager/pftracker
 
 For this you can do:
 
     cd <directory you want to install to>
-    git clone http://github.com/bdager/pftraker
+    git clone http://github.com/bdager/pftracker
     python setup.py install
 
 **Note**
@@ -67,20 +67,21 @@ dlib, scikit-image, Matplotlib, FilterPy and Python 3.6.
 ## Example
         
 First construct the object and defined input video, filter parameters and 
-target model if you want options other than the default ones.
+target model if you want different options than the default ones.
 
     from pftracker.track import Track
     pf = Track(video="pftracker\input\Aaron_Guiel\Aaron_Guiel5.avi")
-        
-Then run the algorithm with the previous definitions and specifying 
+     
+> To perform face tracking on webcam video just run: pf = Track()
+	 
+Then run the algorithm with the previous definitions and specify 
 the number of algorihm iterations and ground truth file is you want to
-calculate precision and recall error metrics. Specify errorFile,
+calculate precision and recall error metrics. Also specify errorFile,
 saveTrackFile and saveVideo for saving error, estimates and resulting
 video files.
                   
     pf.run(iterations=2, 
-            gt="pftracker\input\Aaron_Guiel\Aaron_Guiel5.labeled_faces.txt",
-            pf_tracker(saveVideo="pftracker\output\pf_error.txt"))
+            gt="pftracker\input\Aaron_Guiel\Aaron_Guiel5.labeled_faces.txt")
         
 After that you are going to see the face tracking performing over the
 selected input video.
@@ -91,11 +92,13 @@ ground truth file previously, then you can run:
 
     pf.plotError()    
 
+See pftracker documentation for more details on http://pftracker.readthedocs.org
+
 
 ## Useful links
 
 Source code:
-https://github.com/bdager/pftraker
+https://github.com/bdager/pftracker
 
 Documentation:
 http://pftracker.readthedocs.org

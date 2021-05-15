@@ -2,7 +2,7 @@ Links
 =====
 
 Source code:
-https://github.com/bdager/pftraker-master/pftracker
+https://github.com/bdager/pftracker
 
 Documentation:
-http://pyparticleest.readthedocs.org ??????? Como hacer un link????
+http://pftracker.readthedocs.org

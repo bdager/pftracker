@@ -65,24 +65,23 @@ class Track():
     Example:
         
         First construct the object and defined input video, filter parameters and 
-        target model if you want options other than the default ones.
+        target model if you want different options than the default ones.
     
         .. code::
     
             from pftracker.track import Track
             pf = Track(video="pftracker\input\Aaron_Guiel\Aaron_Guiel5.avi")
         
-        Then run the algorithm with the previous definitions and specifying 
+        Then run the algorithm with the previous definitions and specify 
         the number of algorihm iterations and ground truth file is you want to
-        calculate precision and recall error metrics. Specify errorFile,
+        calculate precision and recall error metrics. Also specify errorFile,
         saveTrackFile and saveVideo for saving error, estimates and resulting
         video files.
         
         .. code::
             
             pf.run(iterations=2, 
-                   gt="pftracker\input\Aaron_Guiel\Aaron_Guiel5.labeled_faces.txt",
-                   pf_tracker(saveVideo="pftracker\output\pf_error.txt"))
+                   gt="pftracker\input\Aaron_Guiel\Aaron_Guiel5.labeled_faces.txt")
         
         After that you are going to see the face tracking performing over the
         selected input video.
@@ -139,7 +138,7 @@ class Track():
                 
                 .. code::
                     
-                    pf_tracker(saveVideo="pftracker\output\pf_error.txt")
+                    pf.run(errorFile="pftracker\output\pf_error.txt")
                     
                 In case of the number of iterations is greater than 1, the
                 errors of each tracking iteration are saved in the same
@@ -153,7 +152,7 @@ class Track():
                 
                 .. code::
                     
-                    pf_tracker(saveVideo="pftracker\output\pf_estimates.txt")
+                    pf.run(saveTrackFile="pftracker\output\pf_estimates.txt")
                     
                 In case of the number of iterations is greater than 1, all the
                 estimates of each tracking iteration are saved in the same
@@ -167,7 +166,7 @@ class Track():
                 
                 .. code::
                     
-                    pf_tracker(saveVideo="pftracker\output\pf_output.avi")
+                    pf.run(saveVideo="pftracker\output\pf_output.avi")
                     
                 In case of the number of iterations is greater than 1 and you
                 want to save all the resulting videos from tracking, you just
@@ -181,7 +180,7 @@ class Track():
                             
                 .. code::    
                             
-                    pf_tracker(2, saveVideo="pftracker\output\pf_output.avi")
+                    pf.run(2, saveVideo="pftracker\output\pf_output.avi")
                         
                 The resulting video file names are:
                     
