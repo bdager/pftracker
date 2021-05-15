@@ -6,3 +6,4 @@ pyqt5
 scikit-image >= 0.13.1
 matplotlib
 filterpy
+cmake
