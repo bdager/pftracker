@@ -1,4 +1,5 @@
 pyproject.toml
+.readthedocs.yml
 docs/build/
 docs/build_pdf/
 .pftracker/ui_sources/dialog_error.ui
