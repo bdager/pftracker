@@ -72,7 +72,7 @@ target model if you want different options than the default ones.
     from pftracker.track import Track
     pf = Track(video="pftracker\input\Aaron_Guiel\Aaron_Guiel5.avi")
      
-> *To perform face tracking on webcam video just run: pf = Track()*
+> *Note: To perform face tracking on webcam video just run: pf = Track()*
 	 
 Then run the algorithm with the previous definitions and specify 
 the number of algorihm iterations and ground truth file is you want to
