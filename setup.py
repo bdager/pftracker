@@ -73,7 +73,7 @@ setup(
     # simple. Or you can use find_packages().
     package_dir={"": "pftracker"},
     packages=find_packages(where="pftracker"),
-    python_requires="==3.6",
+#    python_requires="==3.6",
 
     # List run-time dependencies here.  These will be installed by pip when your
     # project is installed. For an analysis of "install_requires" vs pip's
