@@ -1,6 +1,7 @@
 numpy
 opencv-python
 imutils
+dlib == 19.8.1
 pyqt5
 scikit-image >= 0.13.1
 matplotlib

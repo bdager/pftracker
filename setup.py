@@ -48,7 +48,7 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Mathematics',
-        'Topic :: Scientific/Engineering :: Physics',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Utilities',
 
 
