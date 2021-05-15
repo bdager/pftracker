@@ -62,7 +62,7 @@ you can run the graphical interface since the command prompt or a python virtual
 ## Requirements
 
 This graphical interface uses NumPy, OpenCV, PyQt5, imutils,  
-dlib, scikit-image, Matplotlib, FilterPy and Python 3.6.
+dlib, scikit-image, Matplotlib, FilterPy and Python 3.
 	
 ## Example
         
