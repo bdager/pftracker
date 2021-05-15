@@ -17,7 +17,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
-    version="0.1.4",
+    version="0.0.1",
 
     description="Face tracking based on particle filter",
     long_description=long_description,
