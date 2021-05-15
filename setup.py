@@ -3,8 +3,12 @@ from codecs import open  # To use a consistent encoding
 
 
 # Get the long description from the relevant file
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+#with open("README.rst", "r", encoding='utf-8') as fh:
+#with open("README.rst", "r") as fh:
+#    long_description = fh.read()
+
+with open('README.md') as f:
+    long_description = f.read()
 
 
 setup(
@@ -13,10 +17,11 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
-    version="0.0.1",
+    version="0.1.4",
 
     description="Face tracking based on particle filter",
     long_description=long_description,
+#    long_description_content_type="text/x-rst",
     long_description_content_type="text/markdown",
 
     # The project's main homepage.
@@ -27,7 +32,7 @@ setup(
     author_email="bessie.dominguez97@gmail.com",
 
     # Choose your license
-    license='GNU GPLv3',
+#    license="GPLv3",
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -48,10 +53,11 @@ setup(
 
 
         # Pick your license as you wish (should match "license" above)
-        'License :: OSI Approved :: GNU GPLv3 License',
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         
         'Operating System :: Microsoft :: Windows',
@@ -67,14 +73,14 @@ setup(
     # simple. Or you can use find_packages().
     package_dir={"": "pftracker"},
     packages=find_packages(where="pftracker"),
-    python_requires=">=3.6",
+    python_requires="==3.6",
 
     # List run-time dependencies here.  These will be installed by pip when your
     # project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/discussions/install-requires-vs-requirements/
-    install_requires=['numpy', 'matplotlib', 'opencv', 'imutils', 'dlib',
-                      'pyqt5', 'skimage', 'os', 'ctypes', 'time', 'filterpy'],
+#    install_requires=['numpy', 'matplotlib', 'opencv', 'imutils', 'dlib',
+#                      'pyqt5', 'skimage', 'os', 'ctypes', 'time', 'filterpy'],
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
