@@ -16,8 +16,8 @@ users can define the number of algorithm runs on the same video sequence.
 The idea of this graphical interface is to provide comfortable handling and analysis of the particle filter algorithms and their parameters, as well as the evaluation of the face tracking for different video inputs. In this way, it allows any user, regardless of the level of knowledge on the subject, to easily use these tools and quickly compare their results. 
 
 
-Istallation
-***********
+Installation
+************
 
 **Via PyPI**
 
@@ -42,9 +42,10 @@ For this you can do:
     python setup.py install
 
 **Note**
+
 In the GitHub repository there is a file trackUI.py, this file runs the the graphical interface. 
-Once you have the pftracker installed and the trackUI.py in the same directory of the package, 
-you can run the graphical interface since the command prompt,a python virtual enviroment or shell by:
+Once you have the pftracker installed and the trackUI.py, you can run the graphical interface since
+the command prompt, a python virtual environment or shell by:
 
 ::
 

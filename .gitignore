@@ -1,9 +1,9 @@
 pyproject.toml
+build/
+dist/
 docs/build/
 docs/build_pdf/
-.pftracker/ui_sources/dialog_error.ui
-.pftracker/ui_sources/dialog_facedetector.ui
-.pftracker/ui_sources/dialog_results.ui
-.pftracker/ui_sources/mainwindow.ui
-.pftracker/ui_sources/mainwindow1.ui
-.pftracker/ui_sources/mainwindow_ui.py
+pftracker/ui_sources/dialog_error.ui
+pftracker/ui_sources/dialog_facedetector.ui
+pftracker/ui_sources/dialog_results.ui
+pftracker/ui_sources/mainwindow.ui

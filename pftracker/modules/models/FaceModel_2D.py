@@ -329,7 +329,11 @@ class FaceTracking_2D():
         return P, R, P_mean, R_mean, P_std, R_std
                        
             
-    def close_e(self):        
+    def close_e(self): 
+        """Close video file if it has reached to the end or if the window 
+        of the video has been closed.
+
+        """
         # check if it's necessary to release the video writer pointer
         if self.writer is not None:
             self.writer.release()

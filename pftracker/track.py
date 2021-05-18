@@ -13,8 +13,13 @@ class Track():
     Track class provides top-level of pftracker module for user
     handeling. Here are defined all the particle filter parameters
     and target model specifications for perfoming the task of face
-    traking in video sequences.
-           
+    traking in video sequences.     
+      
+    Methods:
+        run(iterations, gt, errorFile, saveTrackFile, saveVideo): Perform the 
+            face tracking based on particle filter.
+        plotError(): Plot precision and recall error metrics.
+            
     Args:
        video(str, optional): Path to the input video file 
            (.mp4 or .avi format). Default is the reference
@@ -62,6 +67,10 @@ class Track():
         - '5_variables': Five variables state space model
         - '6_variables': Six variables state space model   
 
+    Raises:
+        AssertionError: Exception raised if the path to the input video file 
+            does not contain .mp4 or .avi extension.
+            
     Example:
         
         First construct the object and defined input video, filter parameters and 
@@ -83,6 +92,9 @@ class Track():
             pf.run(iterations=2, 
                    gt="pftracker\input\Aaron_Guiel\Aaron_Guiel5.labeled_faces.txt")
         
+        Note that if you want to specify a file for saving error you should
+        provide the ground truth file too.
+        
         After that you are going to see the face tracking performing over the
         selected input video.
         
@@ -99,7 +111,20 @@ class Track():
                  detector="CaffeModel", estimate="weighted_mean", 
                  resample="systematic", resamplePercent=50, 
                  robustPercent=20, obsmodel="HSV color-based", 
-                 stateSpace="dynamic_bbox"):            
+                 stateSpace="dynamic_bbox"):                 
+        # handling input format error type
+        if video != None:
+            error_text = ("Path to the input video file should contain "
+                          ".mp4 or .avi extension at the end.\n"
+                          "\tExample: Track(video=\"pftracker\input"
+                          "\Aaron_Guiel\Aaron_Guiel5.avi\")")       
+            avi_file = "avi" == video.split(".")[-1] 
+            mp4_file = "mp4" == video.split(".")[-1]  
+            assert (avi_file or mp4_file), error_text
+            
+        # Input Video
+        self.video = video
+        
         # Filter parameters
         self.algorithm = algorithm 
         self.n_particles = n_particles         
@@ -112,9 +137,6 @@ class Track():
         # Target model parameters
         self.obsmodel = obsmodel
         self.stateSpace = stateSpace
-        
-        # Input Video
-        self.video = video
 
         
     def run(self, iterations=10, gt=None, errorFile=None, 
@@ -145,6 +167,8 @@ class Track():
                 .txt file separated by a blank line. Besides, average precision, 
                 recall, elapsed time and fps per iteration are going to be 
                 saved at the end of the file.
+                Note that if you want to save the error file you should
+                provide the ground truth file too.
             saveTrackFile(str, optional): Path to the estimate .txt file.
                 Default is None (do not save estimates).
                 
@@ -187,6 +211,16 @@ class Track():
                 pf_output0001.avi
                 
                 pf_output0002.avi 
+            
+        Raises:
+            AssertionError: Exception raised if the path to the ground truth  
+                file does not contain the .txt extension.
+            AssertionError: Exception raised if the path to the error   
+                file does not contain the .txt extension.
+            AssertionError: Exception raised if the path to the estimates  
+                file does not contain the .txt extension.
+            AssertionError: Exception raised if the path to the output video  
+                file does not contain .avi extension.
         """
         i = iterations
         self.ii = iterations
@@ -199,8 +233,8 @@ class Track():
         R_std_array = np.zeros((i,1))
         t_array = np.zeros((i,1))
         fps_array = np.zeros((i,1))
-        idx = 0
-            
+        self.idx = 0
+        
         pf = particle_tracker(video = self.video, algorithm = self.algorithm,
                               n_particles = self.n_particles, detector = self.detector,
                               estimate = self.estimate, resample = self.resample, 
@@ -208,19 +242,37 @@ class Track():
                               robustPercent = self.robustPercent, 
                               obsmodel = self.obsmodel, stateSpace = self.stateSpace)
         
+        if gt != None:
+            error_text = ("Path to the ground truth file should contain the "
+                          ".txt extension at the end.\n"
+                          "\tExample: pf.run(gt=\"pftracker\input\Aaron_Guiel"
+                          "\Aaron_Guiel5.labeled_faces.txt\")")                              
+            assert "txt" == gt.split(".")[-1], error_text
+        
+        if errorFile != None:
+            error_text = ("Path to the error file should contain the "
+                          ".txt extension at the end.\n"
+                          "\tExample: pf.run(errorFile=\"pftracker\output"
+                          "\pf_error.txt\")")                              
+            assert "txt" == errorFile.split(".")[-1], error_text
+            
         if saveTrackFile != None:
             error_text = ("Path to the estimates file should contain the "
                           ".txt extension at the end.\n"
-                          "\tExample: pf_tracker(saveVideo=\"pftracker"
+                          "\tExample: pf.run(saveTrackFile=\"pftracker"
                           "\output\pf_estimates.txt\")")                              
-            assert "txt" == errorFile.split(".")[-1], error_text
+            assert "txt" == saveTrackFile.split(".")[-1], error_text
          
-        if saveVideo != None and self.ii != 1:
+        if saveVideo != None:
             error_text = ("Path to the output video file should contain "
                           "the .avi extension at the end.\n"
-                          "\tExample: pf_tracker(saveVideo=\"pftracker"
+                          "\tExample: pf.run(saveVideo=\"pftracker"
                           "\output\pf_output.txt\")")                              
-            assert "avi" == errorFile.split(".")[-1], error_text
+            assert "avi" == saveVideo.split(".")[-1], error_text
+        
+        # If the input video is the reference to the webcam, call pf just       
+        # once with that reference, if it´s not call pf depending on the
+        # number of algorithm runs
         
         # Perform face tracking on webcam video        
         if self.video == None:            
@@ -250,61 +302,67 @@ class Track():
                 video_output = saveVideo
             
             while (i > 0):
-                print ("Run: {}".format(idx+1))
+                print ("Run: {}".format(self.idx+1))
                 
                 if saveVideo != None and self.ii != 1:
-                    video_output = saveVideo + "{}.avi".format(str(idx+1).zfill(4))
+                    video_output = saveVideo + "{}.avi".format(str(self.idx+1).zfill(4))
                 
                 try:
-                    t_i, fps_i = pf.face_tracking(video_output)                     
+                    t_i, fps_i = pf.face_tracking(video_output)   
             
                 except AssertionError as faceDetect_error:    
                     print(faceDetect_error.args[0])
 
-                else:                
+                else:
+                    # get the number of video frames at the first run
+                    if self.idx == 0:
+                        first_track = pf.get_pf_est()
+                    
+                    # if the video window is closed, break the loop. With this
+                    # intention compare the number of frames at the first run
+                    # with the current one
+                    track = pf.get_pf_est()                    
+                    if len(first_track) != len(track):
+                        break
+                    
                     t += t_i
                     fps += fps_i
-                    t_array[idx] = t_i
-                    fps_array[idx] = fps_i
-                    
+                    t_array[self.idx] = t_i
+                    fps_array[self.idx] = fps_i
+                                        
                     if gt != None:
                         P_i, R_i,P_mean_i,R_mean_i,P_std_i,R_std_i = pf.eval_pf(gt)
                         
-                        try:
-                            self.P += P_i
-                        except ValueError:
-                            break
-                        else:
-                            self.R += R_i
+                        self.P += P_i
+                        self.R += R_i
                                                
-                            self.P_array[idx] = P_mean_i
-                            self.R_array[idx] = R_mean_i
-                            P_std_array[idx] = P_std_i
-                            R_std_array[idx] = R_std_i
+                        self.P_array[self.idx] = P_mean_i
+                        self.R_array[self.idx] = R_mean_i
+                        P_std_array[self.idx] = P_std_i
+                        R_std_array[self.idx] = R_std_i
                             
-                            P_std_perFrame += P_std_i
-                            R_std_perFrame += R_std_i
+                        P_std_perFrame += P_std_i
+                        R_std_perFrame += R_std_i
                         
-                            print("[INFO] approx. precision: {:.2f} +- {:.2f}"
-                                  .format(P_mean_i, P_std_i))
-                            print("[INFO] approx. recall: {:.2f} +- {:.2f}"
-                                  .format(R_mean_i, R_std_i))
+                        print("[INFO] approx. precision: {:.2f} +- {:.2f}"
+                              .format(P_mean_i, P_std_i))
+                        print("[INFO] approx. recall: {:.2f} +- {:.2f}"
+                              .format(R_mean_i, R_std_i))
                             
-                            if errorFile != None:
-                                # Write tracking error as P R          
-                                for pt in zip(P_i, R_i):            
-                                    error_output.write("%.2f %.2f \n" % pt)         
-                                error_output.write("\n")
+                        if errorFile != None:
+                            # Write tracking error as P R          
+                            for pt in zip(P_i, R_i):            
+                                error_output.write("%.2f %.2f \n" % pt)         
+                            error_output.write("\n")
                     
                     if saveTrackFile != None:
-                        track = pf.get_pf_est()
                         # Write track points as x, y, w, w          
                         for pt in track:            
                             est_output.write("%.2f %.2f %.2f %.2f \n" % pt) 
                         est_output.write("\n")
                 
                     i -= 1
-                    idx += 1
+                    self.idx += 1
             
             if gt != None and errorFile != None:
                 error_output.write("Average precision, recall, elapsed time and "
@@ -321,28 +379,29 @@ class Track():
                 est_output.close()
             
             if self.ii == 1:
-                self.P_mean = P_mean_i
-                self.R_mean = R_mean_i
+                if gt != None:
+                    self.P_mean = P_mean_i
+                    self.R_mean = R_mean_i
             else:
-                t /= self.ii
-                fps /= self.ii
+                t /= self.idx
+                fps /= self.idx
                 
-                print("\nTotal of runs: {}".format(idx))
+                print("\nTotal of full runs: {}".format(self.idx))
                 print("Average time (sec): {:.2f}".format(t))
                 print("Average fps: {:.2f}".format(fps))
                 
                 if gt != None:
                     #precision and recall per iteration
-                    self.P /= self.ii
-                    self.R /= self.ii
+                    self.P /= self.idx
+                    self.R /= self.idx
                     
                     # precision and recall standard deviation
                     P_std = np.std(self.P_array, dtype=np.float64)
                     R_std = np.std(self.R_array, dtype=np.float64)
                     
                     # precision and recall standard deviation
-                    P_std_perFrame /= self.ii
-                    R_std_perFrame /= self.ii
+                    P_std_perFrame /= self.idx
+                    R_std_perFrame /= self.idx
                     
                     self.P_mean = sum(self.P)/len(self.P)
                     self.R_mean = sum(self.R)/len(self.R)       
@@ -356,10 +415,16 @@ class Track():
                     
 
     def plotError(self):
+        """Plot precision and recall error metrics.
+        
+        This method plots precision and recall per frame if a ground truth file
+        was provided. If the number of algorithm runs if bigger than one, then
+        precision and recall are plotted per particle filter algorithm run too.
+        """
         try:
             # plot error
             plotE(self.P, self.R, self.P_mean, self.R_mean)
-            if self.ii != 1:
+            if self.idx != 1:
                 plotE_average(self.P_array, self.R_array, self.P_mean, self.R_mean)
         except TypeError:
             print("There is no ground truth file provided for ploting "

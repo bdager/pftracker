@@ -38,6 +38,13 @@ The package is hosted on PyPI, so the most easy installation is using pip:
 
 	pip install pftracker
 
+> Note: The pftracker package is dependent on dlib for face dectection with HOG 
+classifier. dlib package could be hard to install because it requires cmake and 
+other C++ tools dependent on the operation system. The only version of dlib that 
+has been previously compiled to a Built Distribution (.whl file), is for Python 
+3.6 on Windows 10. So, I strongly recommend to install a virtual environment with 
+this characteristics if you want to avoid the hard dlib installation.
+
 **Via Github**
 
 You also can obtain the code by getting it from the GitHub repository:
@@ -51,10 +58,11 @@ For this you can do:
     python setup.py install
 
 **Note**
+
 In the GitHub repository there is a file trackUI.py, this file runs the pftracker package 
 as a graphical interface. 
-Once you have the pftracker installed and the trackUI.py in the same directory of the package, 
-you can run the graphical interface since the command prompt or a python virtual enviroment or shell by:
+Once you have the pftracker installed and the trackUI.py, you can run the graphical interface since
+the command prompt, a python virtual environment or shell by:
 
     [python interpreter] trackUI.py
 
@@ -63,6 +71,7 @@ you can run the graphical interface since the command prompt or a python virtual
 
 This graphical interface uses NumPy, OpenCV, PyQt5, imutils,  
 dlib, scikit-image, Matplotlib, FilterPy and Python 3.
+
 	
 ## Example
         
@@ -82,7 +91,10 @@ video files.
                   
     pf.run(iterations=2, 
             gt="pftracker\input\Aaron_Guiel\Aaron_Guiel5.labeled_faces.txt")
-        
+ 
+Note that if you want to specify a file for saving error you should
+provide the ground truth file too.
+		
 After that you are going to see the face tracking performing over the
 selected input video.
         

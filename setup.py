@@ -71,23 +71,34 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    package_dir={"": "pftracker"},
-    packages=find_packages(where="pftracker"),
+#    package_dir={"": "pftracker"},
+#    packages=find_packages(where="pftracker"),
+    packages = find_packages(),
+#    packages=["pftracker"],
 #    python_requires="==3.6",
 
     # List run-time dependencies here.  These will be installed by pip when your
     # project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/discussions/install-requires-vs-requirements/
-#    install_requires=['numpy', 'matplotlib', 'opencv', 'imutils', 'dlib',
-#                      'pyqt5', 'skimage', 'os', 'ctypes', 'time', 'filterpy'],
+    install_requires=['numpy', 
+                      'matplotlib', 
+                      'opencv-python', 
+                      'imutils',
+                      'pyqt5', 
+                      'scikit-image', 
+                      'dlib == 19.8.1', 
+                      'filterpy'],
+#dlib-compiled
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
     package_data={
-        'pftracker': ['README.md', 'LICENSE'],
+        'pftracker': ['README.md', 'LICENSE', 'modules/facedetection/models/*',
+                      'ui_sources/icons/*'],
     },
+
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages.

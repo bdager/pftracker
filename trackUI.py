@@ -5,7 +5,7 @@ Running Particle Filter Toolbox.
 @author: Bessie Domínguez-Dáger
 """
 # import ui files
-from pftracker.ui_sources.mainwindow_ui1 import *
+from pftracker.ui_sources.mainwindow_ui import *
 from pftracker.ui_sources.dialog_results_ui import *
 from pftracker.ui_sources.dialog_facedetector_ui import *
 from pftracker.ui_sources.dialog_error_ui import *
@@ -28,14 +28,21 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 
 # specify some paths
 execution_path = os.getcwd()
-icon_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", "icons", "PFT.PNG"])
+icon_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", 
+                              "icons", "PFT.PNG"])
 input_path = os.path.sep.join([execution_path, "pftracker", "input"])
-output_path = os.path.sep.join([execution_path, "pftracker", "output", "pf_output.txt"])
-output_error_path = os.path.sep.join([execution_path, "pftracker", "output", "pf_error.txt"])
-outputVideo_path = os.path.sep.join([execution_path, "pftracker", "output", "pf_output.avi"])
-icon_acept_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", "icons", "Descargados", "icons8-checkmark (1).svg"])
-icon_run_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", "icons", "run_transp.png"])
-icon_close_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", "icons", "cerrar_t.PNG"])
+output_path = os.path.sep.join([execution_path, "pftracker", "output", 
+                                "pf_output.txt"])
+output_error_path = os.path.sep.join([execution_path, "pftracker", "output", 
+                                      "pf_error.txt"])
+outputVideo_path = os.path.sep.join([execution_path, "pftracker", "output", 
+                                     "pf_output.avi"])
+icon_acept_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", 
+                                    "icons", "icons8-checkmark (1).svg"])
+icon_run_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", 
+                                  "icons", "run_transp.png"])
+icon_close_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", 
+                                    "icons", "cerrar_t.PNG"])
 
 
 class Dialog_results(QDialog, Ui_Dialog_results):
@@ -117,7 +124,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.outputErrorPath = None
         self.outVideoName = None
         self.fileNameSignal = None
-        self.nameSignal = ''    
+        self.nameSignal = "webcam"    
         self.detector = '' 
         self.gtFileName = ''
             
@@ -226,7 +233,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         R_std_array = np.zeros((i,1))
         t_array = np.zeros((i,1))
         fps_array = np.zeros((i,1))
-        idx = 0
+        self.idx = 0
         
         self.pf = particle_tracker(video= self.fileNameSignal, 
                                    algorithm = self.algorithm,
@@ -239,16 +246,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                    obsmodel = self.obsModel,
                                    stateSpace = self.stateSpace) 
         
-        # if the input video is the reference to the webcam call pf just       
+        # if the input video is the reference to the webcam, call pf just       
         # once with that reference, if it´s not call pf depending on the
         # number of algorithm runs
+        
+        # Perform face tracking on webcam video
         if self.fileNameSignal == None:
             self.t_elapsed, self.fps = self.pf.face_tracking(self.outVideoName) 
             
             # Save pf estimates
             if self.outputName is not None:
                  self.pf.save_estimation(self.outputName)
-                        
+                 
+        # Perform face tracking on video file                
         else:                
             if self.outputName is not None:
                 # Open .txt estimates file                  
@@ -264,10 +274,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 video_output = self.outVideoName
                 
             while (i > 0):
-                print ("Run: {}".format(idx+1))
+                print ("Run: {}".format(self.idx+1))
                 
                 if self.outVideoName is not None and self.ii != 1:
-                        video_output = self.outVideoName + "{}.avi".format(str(idx+1).zfill(4)) 
+                    video_output = self.outVideoName + "{}.avi".format(str(self.idx+1).zfill(4)) 
                     
                 try:
                     t_elapsed_i, fps_i =  self.pf.face_tracking(video_output)                      
@@ -279,39 +289,46 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.showMessage("Error message", text_error, QMessageBox.Critical,
                                          QMessageBox.Ok, QMessageBox.Ok)   
         
-                else:                                   
+                else:  
+                    # get the number of video frames at the first run
+                    if self.idx == 0:
+                        first_track = self.pf.get_pf_est()
+                        
+                    # if the video window is closed, break the loop. With this
+                    # intention compare the number of frames at the first run
+                    # with the current one
+                    track = self.pf.get_pf_est()                    
+                    if len(first_track) != len(track):
+                        break
+                                            
                     t += t_elapsed_i
                     fps += fps_i
-                    t_array[idx] = t_elapsed_i
-                    fps_array[idx] = fps_i
+                    t_array[self.idx] = t_elapsed_i
+                    fps_array[self.idx] = fps_i
                                         
                     if self.gtFileName != '':
                         # Evaluate particle filter algorithm performance
                         P_i, R_i, P_mean_i, R_mean_i, P_std_i, R_std_i = self.pf.eval_pf(self.gtFileName)
                         
-                        try:
-                            self.P += P_i
-                        except ValueError:
-                            break
-                        else:
-                            self.R += R_i
+                        self.P += P_i
+                        self.R += R_i
                             
-                            self.P_array[idx] = P_mean_i
-                            self.R_array[idx] = R_mean_i
-                            P_std_array[idx] = P_std_i
-                            R_std_array[idx] = R_std_i
+                        self.P_array[self.idx] = P_mean_i
+                        self.R_array[self.idx] = R_mean_i
+                        P_std_array[self.idx] = P_std_i
+                        R_std_array[self.idx] = R_std_i
                             
-                            P_std_perFrame += P_std_i
-                            R_std_perFrame += R_std_i
+                        P_std_perFrame += P_std_i
+                        R_std_perFrame += R_std_i
                         
-                            print("[INFO] approx. precision: {:.2f} +- {:.2f}".format(P_mean_i, P_std_i))
-                            print("[INFO] approx. recall: {:.2f} +- {:.2f}".format(R_mean_i, R_std_i))
+                        print("[INFO] approx. precision: {:.2f} +- {:.2f}".format(P_mean_i, P_std_i))
+                        print("[INFO] approx. recall: {:.2f} +- {:.2f}".format(R_mean_i, R_std_i))
                         
-                            if self.outputErrorPath is not None:
-                                # Write tracking error as P R          
-                                for pt in zip(P_i, R_i):            
-                                    error_output.write("%.2f %.2f \n" % pt)         
-                                error_output.write("\n")
+                        if self.outputErrorPath is not None:
+                            # Write tracking error as P R          
+                            for pt in zip(P_i, R_i):            
+                                error_output.write("%.2f %.2f \n" % pt)         
+                            error_output.write("\n")
                 
                     if self.outputName is not None:
                         track = self.pf.get_pf_est()
@@ -321,7 +338,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         est_output.write("\n")
                     
                     i -= 1
-                    idx += 1
+                    self.idx += 1
             
             if self.gtFileName != '' and self.outputErrorPath != None:
                 error_output.write("Average precision, recall, elapsed time and "
@@ -339,30 +356,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             if self.ii == 1:
                 self.t_elapsed, self.fps = t_elapsed_i, fps_i
-                self.P_mean = P_mean_i
-                self.R_mean = R_mean_i
+                if self.gtFileName != '':
+                    self.P_mean = P_mean_i
+                    self.R_mean = R_mean_i
             else:            
-                t /= self.ii
-                fps /= self.ii
+                t /= self.idx
+                fps /= self.idx
                 
                 self.t_elapsed, self.fps = t, fps
                 
-                print("\nTotal of runs: {}".format(idx))
+                print("\nTotal of full runs: {}".format(self.idx))
                 print("Average time (sec): {:.2f}".format(t))
                 print("Average fps: {:.2f}".format(fps))
                 
                 if self.gtFileName != '':
                     #precision and recall per iteration
-                    self.P /= self.ii
-                    self.R /= self.ii
+                    self.P /= self.idx
+                    self.R /= self.idx
                     
                     # precision and recall standard deviation
                     P_std = np.std(self.P_array, dtype=np.float64)
                     R_std = np.std(self.R_array, dtype=np.float64)
                     
                     # precision and recall standard deviation
-                    P_std_perFrame /= self.ii
-                    R_std_perFrame /= self.ii
+                    P_std_perFrame /= self.idx
+                    R_std_perFrame /= self.idx
                     
                     self.P_mean = sum(self.P)/len(self.P)
                     self.R_mean = sum(self.R)/len(self.R)       
@@ -391,7 +409,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.dialog_results.label_Modelo.setText("2D Face Tracking")
         self.dialog_results.label_ee.setText(self.comboBox_ee.currentText())
         self.dialog_results.label_obsmodel.setText(self.comboBox_obsmodel.currentText())
-        self.dialog_results.label_resultRuns.setText(self.spinBox_runs.text())
+        self.dialog_results.label_resultRuns.setText(str(self.idx))
         
         if self.dialog_results.label_resAlgorithm.isEnabled():
             self.dialog_results.label_resAlgorithm.setText(self.comboBox_Tresample.currentText())
@@ -546,13 +564,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.R_mean)        
         show(qmc1)
             
-        if self.spinBox_runs.value() != 1:
-#            try:
+        if self.idx != 1:
             qmc2 = plotE_average(self.dialog_error.widget, self.P_array, 
                                      self.R_array, self.P_mean, self.R_mean)
-#            except ValueError:
-#                print("Now it is impossible to calculate eror per algorithm run")            
-#            else:
             show(qmc2)            
             
     
@@ -566,7 +580,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             fileName = QFileDialog.getSaveFileName(self, "Save video file",
                            outputVideo_path, "Video (*.avi)")
             self.outVideoName = fileName[0]
-            print(self.outVideoName)
         else:
             self.outVideoName = None
             
