@@ -17,15 +17,14 @@ class detect_one_face():
     Class used for detecting one face in the first frame of video where
     particle filter algorithm is going to be applied.
     
+    Args:
+        image (array): image where the face detection is perfomed
+    
     Supported Face detectors:
         - 'HaarCascade': Viola and Jones (V&J) detector 
         - 'CaffeModel': Single Shot Detector (SSD) 
-        - 'dlib': Histogram of Oriented Gradient (HOG)
-    
-    Args:
-        image (array): image where the face detection is perfomed
-    """
-    
+        - 'dlib': Histogram of Oriented Gradient (HOG)  
+    """    
     def __init__(self, image):  
         # Load the input image
         self.image = image

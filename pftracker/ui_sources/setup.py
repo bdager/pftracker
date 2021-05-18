@@ -17,10 +17,11 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
-    version="0.0.1",
+    version="0.2.0",
 
     description="Face tracking based on particle filter",
     long_description=long_description,
+#    long_description_content_type="text/x-rst",
     long_description_content_type="text/markdown",
 
     # The project's main homepage.
@@ -88,6 +89,7 @@ setup(
                       'scikit-image', 
                       'dlib == 19.8.1', 
                       'filterpy'],
+#dlib-compiled
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these

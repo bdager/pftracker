@@ -26,10 +26,18 @@ import ctypes
 import numpy as np
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 
-# specify some paths
+# import ui icons
+pftracker_path = os.path.dirname(os.path.realpath('particle_tracker'))
+PFT_icon_path = os.path.sep.join([pftracker_path, "ui_sources", "icons", "PFT.PNG"])
+icon_acept_path = os.path.sep.join([pftracker_path, "ui_sources", "icons",
+                                    "icons8-checkmark (1).svg"])
+icon_run_path = os.path.sep.join([pftracker_path, "ui_sources", "icons",
+                                  "run_transp.png"])
+icon_close_path = os.path.sep.join([pftracker_path, "ui_sources", "icons",
+                                    "cerrar_t.PNG"])
+
+# specify input and output paths
 execution_path = os.getcwd()
-icon_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", 
-                              "icons", "PFT.PNG"])
 input_path = os.path.sep.join([execution_path, "pftracker", "input"])
 output_path = os.path.sep.join([execution_path, "pftracker", "output", 
                                 "pf_output.txt"])
@@ -37,12 +45,6 @@ output_error_path = os.path.sep.join([execution_path, "pftracker", "output",
                                       "pf_error.txt"])
 outputVideo_path = os.path.sep.join([execution_path, "pftracker", "output", 
                                      "pf_output.avi"])
-icon_acept_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", 
-                                    "icons", "icons8-checkmark (1).svg"])
-icon_run_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", 
-                                  "icons", "run_transp.png"])
-icon_close_path = os.path.sep.join([execution_path, "pftracker", "ui_sources", 
-                                    "icons", "cerrar_t.PNG"])
 
 
 class Dialog_results(QDialog, Ui_Dialog_results):
@@ -51,7 +53,7 @@ class Dialog_results(QDialog, Ui_Dialog_results):
     def __init__(self):
         QDialog.__init__(self)
         self.setupUi(self)
-        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowIcon(QIcon(PFT_icon_path))
         self.setWindowFlags(Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self.PB_acept.setIcon(QIcon(icon_acept_path))
         
@@ -61,7 +63,7 @@ class Dialog_facedetector(QDialog, Ui_Dialog_detector):
     def __init__(self):
         QDialog.__init__(self)
         self.setupUi(self)  
-        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowIcon(QIcon(PFT_icon_path))
         self.setWindowFlags(Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         self.PB_acept.setIcon(QIcon(icon_acept_path))        
 
@@ -71,7 +73,7 @@ class Dialog_plotError(QDialog, Ui_Dialog_error):
     def __init__(self):
         QDialog.__init__(self)
         self.setupUi(self)  
-        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowIcon(QIcon(PFT_icon_path))
         self.setWindowFlags(Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowMinMaxButtonsHint)
         self.close_event = False
     
@@ -99,7 +101,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)      # method for generating the interface
-        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowIcon(QIcon(PFT_icon_path))
         self.PB_aceptar.setIcon(QIcon(icon_run_path))
         self.PB_cancelar.setIcon(QIcon(icon_close_path))
         self.pushButton_gtSearch.clicked.connect(self.openGtFile)

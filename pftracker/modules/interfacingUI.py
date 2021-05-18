@@ -128,15 +128,18 @@ class particle_tracker():
         Returns:
             2-element tuple containing
             
-            - **t_elapsed** (*float*): Approximate execution time of the algorithm
-              in the face tracking task.
+            - **t_elapsed** (*float*): Approximate execution time of the 
+              algorithm in the face tracking task.
             - **fps** (*float*): Approximate number of fps.   
+            
+        Raises:
+            AssertionError: Exception raised if the reference to the webcam fail.
         """
         
         # If a video path was not supplied, grab the reference to the webcam    
         if not self.video:
             print("[INFO] starting video stream...")
-            v = VideoStream(src=0).start()
+            v = VideoStream(src=0).start()              
         
         # Otherwise, grab a reference to the video file
         else:
@@ -147,6 +150,17 @@ class particle_tracker():
         
         # Read first frame
         frame = v.read()
+        
+        # If the first frame coudn´t be read raise an error to explain it
+        webcam_error = not(frame is None and self.video is None)
+        assert webcam_error, "The reference to the webcam has failed." 
+        
+        # If the first frame coudn´t be read raise an error to explain it
+        video_file_error = not(frame is None and self.video is not None)
+        error_text = ("Incorrect path to the input video file."  +
+                      "File" + self.video + "can't be open. No such file or "
+                      "directory")
+        assert video_file_error, error_text
           
         # Handle the frame from VideoCapture or VideoStream,
         # vide_stream bool variable indicate if we're working 
