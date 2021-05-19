@@ -28,13 +28,14 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 
 # import ui icons
 pftracker_path = os.path.dirname(os.path.realpath('particle_tracker'))
-PFT_icon_path = os.path.sep.join([pftracker_path, "ui_sources", "icons", "PFT.PNG"])
-icon_acept_path = os.path.sep.join([pftracker_path, "ui_sources", "icons",
-                                    "icons8-checkmark (1).svg"])
-icon_run_path = os.path.sep.join([pftracker_path, "ui_sources", "icons",
-                                  "run_transp.png"])
-icon_close_path = os.path.sep.join([pftracker_path, "ui_sources", "icons",
-                                    "cerrar_t.PNG"])
+PFT_icon_path = os.path.sep.join([pftracker_path, "pftracker", "ui_sources", 
+                                  "icons", "PFT.PNG"])
+icon_acept_path = os.path.sep.join([pftracker_path, "pftracker", "ui_sources",
+                                     "icons", "icons8-checkmark (1).svg"])
+icon_run_path = os.path.sep.join([pftracker_path, "pftracker", "ui_sources", 
+                                  "icons", "run_transp.png"])
+icon_close_path = os.path.sep.join([pftracker_path, "pftracker", "ui_sources", 
+                                    "icons", "cerrar_t.PNG"])
 
 # specify input and output paths
 execution_path = os.getcwd()
@@ -224,6 +225,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def run2DFfilter(self): 
         """Run face tracking based on particle filter."""
+        
+        def print_face_detection_error(error):
+            print(error.args[0])
+            text_error = (self.detector + " could not detect any face, "
+                          "please try with another face detector algorithm.")
+            self.showMessage("Error message", text_error, QMessageBox.Critical,
+                             QMessageBox.Ok, QMessageBox.Ok)
+            
         i = self.spinBox_runs.value()
         self.ii = self.spinBox_runs.value()
         t, fps = 0, 0
@@ -254,11 +263,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         # Perform face tracking on webcam video
         if self.fileNameSignal == None:
-            self.t_elapsed, self.fps = self.pf.face_tracking(self.outVideoName) 
-            
-            # Save pf estimates
-            if self.outputName is not None:
-                 self.pf.save_estimation(self.outputName)
+            try:
+                self.t_elapsed, self.fps, _ = self.pf.face_tracking(self.outVideoName)                       
+                    
+            except AssertionError as faceDetect_error:    
+                 print_face_detection_error(faceDetect_error)
+        
+            else: 
+                # Save pf estimates
+                if self.outputName is not None:
+                    self.pf.save_estimation(self.outputName)
                  
         # Perform face tracking on video file                
         else:                
@@ -282,25 +296,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     video_output = self.outVideoName + "{}.avi".format(str(self.idx+1).zfill(4)) 
                     
                 try:
-                    t_elapsed_i, fps_i =  self.pf.face_tracking(video_output)                      
+                    t_elapsed_i, fps_i, video_closed =  self.pf.face_tracking(video_output)                      
                     
                 except AssertionError as faceDetect_error:    
-                    print(faceDetect_error.args[0])
-                    text_error = (self.detector + " could not detect any face, "
-                                  "please try with another face detector algorithm.")
-                    self.showMessage("Error message", text_error, QMessageBox.Critical,
-                                         QMessageBox.Ok, QMessageBox.Ok)   
+                    print_face_detection_error(faceDetect_error) 
         
-                else:  
-                    # get the number of video frames at the first run
-                    if self.idx == 0:
-                        first_track = self.pf.get_pf_est()
-                        
-                    # if the video window is closed, break the loop. With this
-                    # intention compare the number of frames at the first run
-                    # with the current one
-                    track = self.pf.get_pf_est()                    
-                    if len(first_track) != len(track):
+                else:                          
+                    # if the video window is closed, break the loop
+                    if video_closed.args[0] == "video closed":
                         break
                                             
                     t += t_elapsed_i
@@ -323,8 +326,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         P_std_perFrame += P_std_i
                         R_std_perFrame += R_std_i
                         
-                        print("[INFO] approx. precision: {:.2f} +- {:.2f}".format(P_mean_i, P_std_i))
-                        print("[INFO] approx. recall: {:.2f} +- {:.2f}".format(R_mean_i, R_std_i))
+                        print("[INFO] approx. precision: {:.2f} +- {:.2f}"
+                              .format(P_mean_i, P_std_i))
+                        print("[INFO] approx. recall: {:.2f} +- {:.2f}"
+                              .format(R_mean_i, R_std_i))
                         
                         if self.outputErrorPath is not None:
                             # Write tracking error as P R          
@@ -345,7 +350,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if self.gtFileName != '' and self.outputErrorPath != None:
                 error_output.write("Average precision, recall, elapsed time and "
                              "fps per iteration:\n")
-                for pt in zip(self.P_array, P_std_array, self.R_array, R_std_array, t_array, fps_array):            
+                for pt in zip(self.P_array, P_std_array, self.R_array, 
+                              R_std_array, t_array, fps_array):            
                     error_output.write("%.2f+-%.2f %.2f+-%.2f %.2f %.2f \n" % pt)     
             
             if self.outputErrorPath != None:
@@ -356,12 +362,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 # Close output file
                 est_output.close()
             
-            if self.ii == 1:
+            if self.ii == 1 or self.idx == 0:
                 self.t_elapsed, self.fps = t_elapsed_i, fps_i
                 if self.gtFileName != '':
                     self.P_mean = P_mean_i
                     self.R_mean = R_mean_i
-            else:            
+            else:
                 t /= self.idx
                 fps /= self.idx
                 
@@ -589,7 +595,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def showMessage(self, wTitle, Text, Box, Buttons, dButtons):   
         mb = QMessageBox()
         mb.setWindowTitle(wTitle)
-        mb.setWindowIcon(QIcon(icon_path))
+        mb.setWindowIcon(QIcon(PFT_icon_path))
         mb.setText(Text)
         mb.setIcon(Box)
         mb.setStandardButtons(Buttons)

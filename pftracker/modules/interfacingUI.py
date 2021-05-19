@@ -133,7 +133,10 @@ class particle_tracker():
             - **fps** (*float*): Approximate number of fps.   
             
         Raises:
-            AssertionError: Exception raised if the reference to the webcam fail.
+            AssertionError: Exception raised if the reference to the 
+                webcam failed.
+            AssertionError: Exception raised if the reference to the 
+                input video failed.
         """
         
         # If a video path was not supplied, grab the reference to the webcam    
@@ -152,14 +155,16 @@ class particle_tracker():
         frame = v.read()
         
         # If the first frame coudn´t be read raise an error to explain it
+        # webcam reference
         webcam_error = not(frame is None and self.video is None)
         assert webcam_error, "The reference to the webcam has failed." 
         
         # If the first frame coudn´t be read raise an error to explain it
-        video_file_error = not(frame is None and self.video is not None)
-        error_text = ("Incorrect path to the input video file."  +
-                      "File" + self.video + "can't be open. No such file or "
-                      "directory")
+        # video file reference
+        video_file_error = not(frame[1] is None and self.video is not None)
+        error_text = ("Incorrect path to the input video file.\n"  +
+                      "\t\t\t\tFile " + str(self.video) + " can't be open. "
+                      "No such file or directory")
         assert video_file_error, error_text
           
         # Handle the frame from VideoCapture or VideoStream,
@@ -191,7 +196,7 @@ class particle_tracker():
                          self.robustPercent)                                                            
        
         # Run the particle filter algorithm
-        t_elapsed, fps = self.run.tracking()
+        t_elapsed, fps, video_closed = self.run.tracking()
         print("[INFO] elapsed time: {:.2f} sec".format(t_elapsed))
         print("[INFO] approx. FPS: {:.2f}".format(fps))
             
@@ -204,9 +209,9 @@ class particle_tracker():
             v.release()
             
         # Close all windows
-        cv2.destroyAllWindows()     
+        cv2.destroyAllWindows()    
         
-        return t_elapsed, fps 
+        return t_elapsed, fps, video_closed 
     
     def save_estimation(self, file_name):
         """

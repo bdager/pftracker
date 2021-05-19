@@ -40,7 +40,9 @@ class run_filter():
         self.pf = particlefilter(self.model, self.algorithm, self.N,
                                  self.estimate, self.resample, 
                                  self.resamplePercent, self.robustPercent)
-        self.particles = self.pf.initialization()                    
+        self.particles = self.pf.initialization()           
+        
+        self.video_closed = ''        
         
     def tracking(self):
         """
@@ -62,7 +64,8 @@ class run_filter():
             try:                                        
                 self.particles = self.pf.filtering(self.pf, self.particles)        
                 self.pf.visualize(self.particles)
-            except NameError:
+            except NameError as error:
+                self.video_closed = error
                 # if we are viewing a video and we did not grab a frame,
                 # then we have reached the end of the video
                 break
@@ -75,7 +78,7 @@ class run_filter():
                 
         # Stop the timer 
         self.fps.stop()           
-        return self.fps.elapsed(), self.fps.fps()    
+        return self.fps.elapsed(), self.fps.fps(), self.video_closed   
 
     def save_estimate(self, file_name):
         """

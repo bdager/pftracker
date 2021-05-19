@@ -155,7 +155,7 @@ class FaceTracking_2D():
         # if we are viewing a video and we did not grab a frame,
         # then we have reached the end of the video
         if self.frame is None:
-            self.close_e()        
+            self.close_e(True)        
         
         self.likelihood = self.obsModel.calcDistance(self.frame, particles, self.bbox)          
             
@@ -233,8 +233,9 @@ class FaceTracking_2D():
             
             cv2.imshow('2D Face Tracking', self.frame)
 
+            # close window if the user does it
             if cv2.waitKey(30) & 0xFF == 27 or cv2.getWindowProperty('2D Face Tracking', cv2.WND_PROP_VISIBLE) < 1:
-                self.close_e()
+                self.close_e(False)
   
         self.frameCounter +=1  
         
@@ -329,13 +330,17 @@ class FaceTracking_2D():
         return P, R, P_mean, R_mean, P_std, R_std
                        
             
-    def close_e(self): 
+    def close_e(self, ended): 
         """Close video file if it has reached to the end or if the window 
         of the video has been closed.
-
         """
         # check if it's necessary to release the video writer pointer
         if self.writer is not None:
             self.writer.release()
-            
-        raise NameError("video closed")
+        
+        if ended:
+            # Close video file if it has reached to the end
+            raise NameError("video ended")
+        else:
+            # Close video file if the window of the video has been closed
+            raise NameError("video closed")

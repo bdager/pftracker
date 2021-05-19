@@ -275,9 +275,9 @@ class Track():
         # number of algorithm runs
         
         # Perform face tracking on webcam video        
-        if self.video == None:            
-            pf.face_tracking(saveVideo)
-            
+        if self.video == None: 
+            pf.face_tracking(saveVideo)  
+
             # Save pf estimates
             if saveTrackFile != None:
                 pf.save_estimation(saveTrackFile)
@@ -306,63 +306,53 @@ class Track():
                 
                 if saveVideo != None and self.ii != 1:
                     video_output = saveVideo + "{}.avi".format(str(self.idx+1).zfill(4))
-                
-                try:
-                    t_i, fps_i = pf.face_tracking(video_output)   
-            
-                except AssertionError as faceDetect_error:    
-                    print(faceDetect_error.args[0])
 
-                else:
-                    # get the number of video frames at the first run
-                    if self.idx == 0:
-                        first_track = pf.get_pf_est()
+                t_i, fps_i, video_closed = pf.face_tracking(video_output)   
+            
+                # if the video window is closed, break the loop
+                if video_closed.args[0] == "video closed":                    
+                   
+                    break
                     
-                    # if the video window is closed, break the loop. With this
-                    # intention compare the number of frames at the first run
-                    # with the current one
-                    track = pf.get_pf_est()                    
-                    if len(first_track) != len(track):
-                        break
-                    
-                    t += t_i
-                    fps += fps_i
-                    t_array[self.idx] = t_i
-                    fps_array[self.idx] = fps_i
+                t += t_i
+                fps += fps_i
+                t_array[self.idx] = t_i
+                fps_array[self.idx] = fps_i
                                         
-                    if gt != None:
-                        P_i, R_i,P_mean_i,R_mean_i,P_std_i,R_std_i = pf.eval_pf(gt)
+                if gt != None:
+                    P_i, R_i,P_mean_i,R_mean_i,P_std_i,R_std_i = pf.eval_pf(gt)
                         
-                        self.P += P_i
-                        self.R += R_i
-                                               
-                        self.P_array[self.idx] = P_mean_i
-                        self.R_array[self.idx] = R_mean_i
-                        P_std_array[self.idx] = P_std_i
-                        R_std_array[self.idx] = R_std_i
-                            
-                        P_std_perFrame += P_std_i
-                        R_std_perFrame += R_std_i
-                        
-                        print("[INFO] approx. precision: {:.2f} +- {:.2f}"
-                              .format(P_mean_i, P_std_i))
-                        print("[INFO] approx. recall: {:.2f} +- {:.2f}"
-                              .format(R_mean_i, R_std_i))
-                            
-                        if errorFile != None:
-                            # Write tracking error as P R          
-                            for pt in zip(P_i, R_i):            
-                                error_output.write("%.2f %.2f \n" % pt)         
+                    self.P += P_i
+                    self.R += R_i
+                    
+                    self.P_array[self.idx] = P_mean_i
+                    self.R_array[self.idx] = R_mean_i
+                    P_std_array[self.idx] = P_std_i
+                    R_std_array[self.idx] = R_std_i
+                    
+                    P_std_perFrame += P_std_i
+                    R_std_perFrame += R_std_i
+                    
+                    print("[INFO] approx. precision: {:.2f} +- {:.2f}"
+                          .format(P_mean_i, P_std_i))
+                    print("[INFO] approx. recall: {:.2f} +- {:.2f}"
+                          .format(R_mean_i, R_std_i))
+                    
+                    if errorFile != None:
+                        # Write tracking error as P R          
+                        for pt in zip(P_i, R_i):            
+                            error_output.write("%.2f %.2f \n" % pt)         
                             error_output.write("\n")
                     
-                    if saveTrackFile != None:
-                        # Write track points as x, y, w, w          
-                        for pt in track:            
-                            est_output.write("%.2f %.2f %.2f %.2f \n" % pt) 
-                        est_output.write("\n")
+                if saveTrackFile != None:
+                    track = pf.get_pf_est()
+                    # Write track points as x, y, w, w          
+                    for pt in track:            
+                        est_output.write("%.2f %.2f %.2f %.2f \n" % pt) 
+                    est_output.write("\n")
                 
-                    i -= 1
-                    self.idx += 1
+                i -= 1
+                self.idx += 1
             
             if gt != None and errorFile != None:
                 error_output.write("Average precision, recall, elapsed time and "
@@ -378,7 +368,7 @@ class Track():
                 # Close output file
                 est_output.close()
             
-            if self.ii == 1:
+            if self.ii == 1 or self.idx == 0:
                 if gt != None:
                     self.P_mean = P_mean_i
                     self.R_mean = R_mean_i
