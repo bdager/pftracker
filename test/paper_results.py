@@ -26,6 +26,7 @@ def pf_run(pf_algorithm='G_PF', N = 100, resampling_alg ='systematic',
     # perform face tracking based on PF
     pf.run(iterations=40, gt=gt_file)
     
+    # comment/uncomment this for getting the plots
     # plot precision and recall error metrics per frame and iteration
     pf.plotError() 
 

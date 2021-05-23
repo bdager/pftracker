@@ -27,15 +27,14 @@ import numpy as np
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 
 # import ui icons
-pftracker_path = os.path.dirname(os.path.realpath('particle_tracker'))
-PFT_icon_path = os.path.sep.join([pftracker_path, "pftracker", "ui_sources", 
-                                  "icons", "PFT.PNG"])
-icon_acept_path = os.path.sep.join([pftracker_path, "pftracker", "ui_sources",
-                                     "icons", "icons8-checkmark (1).svg"])
-icon_run_path = os.path.sep.join([pftracker_path, "pftracker", "ui_sources", 
-                                  "icons", "run_transp.png"])
-icon_close_path = os.path.sep.join([pftracker_path, "pftracker", "ui_sources", 
-                                    "icons", "cerrar_t.PNG"])
+import pftracker
+pftracker_path = pftracker.__file__
+ui_sources_path = pftracker_path.split('__init__.py')[0] + 'ui_sources'
+PFT_icon_path = os.path.sep.join([ui_sources_path, "icons", "PFT.PNG"])
+icon_acept_path = os.path.sep.join([ui_sources_path, "icons", 
+                                    "icons8-checkmark (1).svg"])
+icon_run_path = os.path.sep.join([ui_sources_path, "icons", "run_transp.png"])
+icon_close_path = os.path.sep.join([ui_sources_path, "icons", "cerrar_t.PNG"])
 
 # specify input and output paths
 execution_path = os.getcwd()

@@ -6,7 +6,8 @@ by a model class.
 """
 
 import numpy as np
-from filterpy.monte_carlo import multinomial_resample, residual_resample, stratified_resample, systematic_resample
+from numpy.random import random
+from filterpy.monte_carlo import multinomial_resample, stratified_resample, systematic_resample
 from pftracker.modules.filter.pfAlgorithms import pfiltering
 
 class particlefilter():
@@ -172,9 +173,41 @@ class particlefilter():
             weights (array): particle weigths after update process
             
         Returns:
-            (array) of indixes resulting from resampling 
-            with (1,N) dimension 
-        """
+            (array) of indixes resulting from resampling with (1,N) dimension 
+        """        
+        def residual_resample(weights):
+            """ This was taken from filterpy package and some changes were made.
+            
+            Performs the residual resampling algorithm used by particle filters.
+        
+            For more documentation see https://filterpy.readthedocs.org
+            """
+            N = len(weights)
+            indexes = np.zeros(N, 'i')    
+        
+            # take int(N*w) copies of each weight, which ensures particles with the
+            # same weight are drawn uniformly
+            num_copies = (np.floor(N*np.asarray(weights))).astype(int)
+        #    num_copies = (N*np.asarray(weights)).astype(int)
+        #    scaled_weights = N*np.asarray(weights)
+            
+            k = 0
+            for i in range(N):
+                # change done here in num_copies[i][0]
+                for _ in range(np.array(num_copies[i][0])): # make n copies
+                    indexes[k] = i
+                    k += 1
+        
+            # use multinormal resample on the residual to fill up the rest. This
+            # maximizes the variance of the samples
+            residual = weights - num_copies     # get fractional part
+        #    residual = scaled_weights - num_copies
+            residual /= sum(residual)           # normalize
+            cumulative_sum = np.cumsum(residual)
+            cumulative_sum[-1] = 1. # avoid round-off errors: ensures sum is exactly one
+            indexes[k:N] = np.searchsorted(cumulative_sum, random(N-k))
+        
+            return indexes
         
         if self.arg_resample == "systematic":
             indixes = systematic_resample(weights)
