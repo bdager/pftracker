@@ -1,36 +1,36 @@
 Graphical Interface
 ===================
-This section presents the descriptions of modules, classes and methods that handle and run the graphical interface.
+This section presents the descriptions of modules, classes and methods that handle and run the GUI.
 
 trackUI module
 #################
 This module runs the graphical interface. It contain the classes:
  
 .. autoclass:: trackUI.Dialog_results
-   :members:
+		:members:
 
 .. autoclass:: trackUI.Dialog_facedetector
-   :members:
+		:members:
 
 .. autoclass:: trackUI.Dialog_plotError
-   :members:
+		:members:
    
 .. autoclass:: trackUI.MainWindow
-   :members:
+		:members:
 
 track module
 ##############
 This module does the same as the graphical interface but as a Python package.
 
 .. autoclass:: pftracker.track.Track
-   :members:
+		:members:
 
 Interfacing UI
 ##############
 .. autoclass:: pftracker.modules.interfacingUI.ParticleTracker
-   :members:
+		:members:
    
 Running filter
 ##############
 .. autoclass:: pftracker.modules.runFilter.RunFilter
-   :members:
+		:members:
