@@ -12,7 +12,7 @@ For model specifications it provides three state space models and two
 observation models (HSV color- based and Local Binary Patterns (LBP) based). 
 Among filtering options it presents diverse resampling and estimation methods.
 
-It also provide three face detector algorithms to be used in the initialization 
+It also provides three face detector algorithms to be used in the initialization 
 step of particle filter algorithms. These detectors are Viola and Jones (VJ), 
 Single Shot Detector (SSD) and Histogram of Oriented Gradient (HOG).
 
@@ -41,7 +41,7 @@ The package is hosted on PyPI, so the most easy installation is using pip:
 classifier. dlib package could be hard to install because it requires cmake and 
 other C++ tools dependent on the operation system. The only version of dlib that 
 has been previously compiled to a Built Distribution (.whl file), is for Python 
-3.6 on Windows 10. So, I strongly recommend to install a virtual environment with 
+3.6 on Windows 10. So, it is strongly recommend to install a virtual environment with 
 this characteristics if you want to avoid the hard dlib installation.
 
 **Via Github**
