@@ -29,7 +29,7 @@ In this way, it allows any user, regardless of the level of knowledge on
 the subject, to easily use these tools and quickly compare their results. 
 
 
-## Istallation
+## Installation
 
 **Via PyPI**
 
