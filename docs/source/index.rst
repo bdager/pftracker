@@ -6,10 +6,10 @@
 Welcome to Particle Filter Toolbox's documentation!
 ===================================================
 
-Particle Filter Toolbox is a graphical interface created for performing
-face tracking in video sequences. The introduction chapter offers a quick 
-description of the interface and the main ideas behind it. Next chapters 
-document the code that support the tool.
+Particle Filter Toolbox is a GUI (Graphical User Interface) based on a 
+Python framework and created for performing face tracking in video sequences. 
+The introduction chapter offers a quick description of the interface and the
+main ideas behind it. Next chapters document the code that support the tool.
 
 .. toctree::
    :maxdepth: 5
