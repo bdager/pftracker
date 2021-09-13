@@ -5,7 +5,7 @@ This module implements top-level of pftracker module.
 """
 
 import numpy as np
-from pftracker.modules.metrics.plotError import plotE, plotE_average
+from pftracker.modules.metrics.plotErrorTrack import plotE, plotE_average
 from pftracker.modules.interfacingUI import ParticleTracker
 
 class Track():

@@ -4,7 +4,7 @@ This section presents the descriptions of modules, classes and methods that hand
 
 trackUI module
 #################
-This module runs the graphical interface. It contain the classes:
+This module runs the graphical interface. It contains the classes:
  
 .. autoclass:: trackUI.Dialog_results
 		:members:

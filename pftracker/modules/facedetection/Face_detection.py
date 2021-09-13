@@ -8,7 +8,7 @@ import os
 import cv2
 from imutils.face_utils import rect_to_bb
 import numpy as np
-import dlib
+#import dlib
   
 
 class detect_one_face():
@@ -200,20 +200,20 @@ class detect_one_face():
         
         # Initialize dlib's face detector (HOG-based detector) 
         print("[INFO] loading HOG face detector model...")
-        detector = dlib.get_frontal_face_detector()
-        
-        # Convert the input image to grayscale
-        gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        
-        # Obtain face detections
-        rects = detector(gray, 2)
-
-        # Ensure at least one face was detected
-        if len(rects) != 0:            
-            # Get the face detection with the largest confidence
-            face = rect_to_bb(rects[0])  
-            
-            # Get face bounding box coordinates in the format 
-            # (startX, startY, endX, endY)
-            self.bb_faces(face)
+#        detector = dlib.get_frontal_face_detector()
+#        
+#        # Convert the input image to grayscale
+#        gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+#        
+#        # Obtain face detections
+#        rects = detector(gray, 2)
+#
+#        # Ensure at least one face was detected
+#        if len(rects) != 0:            
+#            # Get the face detection with the largest confidence
+#            face = rect_to_bb(rects[0])  
+#            
+#            # Get face bounding box coordinates in the format 
+#            # (startX, startY, endX, endY)
+#            self.bb_faces(face)
                                

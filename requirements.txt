@@ -1,10 +1,10 @@
 numpy
-opencv-python
+opencv-python == 4.2.0
 imutils
-dlib-compiled
+dlib == 19.8.1
 pyqt5
 scikit-image >= 0.13.1
 matplotlib
-filterpy
+filterpy == 1.4.5
 setuptools >= 42
 wheel

@@ -17,7 +17,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # http://packaging.python.org/en/latest/tutorial.html#version
-    version="0.0.1",
+    version="0.0.2",
 
     description="Face tracking based on particle filter",
     long_description=long_description,
@@ -82,12 +82,12 @@ setup(
     # https://packaging.python.org/discussions/install-requires-vs-requirements/
     install_requires=['numpy', 
                       'matplotlib', 
-                      'opencv-python', 
+                      'opencv-python == 4.2.0', 
                       'imutils',
                       'pyqt5', 
                       'scikit-image', 
                       'dlib == 19.8.1', 
-                      'filterpy'],
+                      'filterpy == 1.4.5'],
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
