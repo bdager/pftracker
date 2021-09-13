@@ -17,7 +17,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 
 # import particle filter files
-from pftracker.modules.interfacingUI import particle_tracker
+from pftracker.modules.interfacingUI import ParticleTracker
 from pftracker.modules.metrics import plotE, plotE_average 
 
 # import some required packages
@@ -28,13 +28,13 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT
 
 # import ui icons
 import pftracker
-pftracker_path = pftracker.__file__
-ui_sources_path = pftracker_path.split('__init__.py')[0] + 'ui_sources'
-PFT_icon_path = os.path.sep.join([ui_sources_path, "icons", "PFT.PNG"])
-icon_acept_path = os.path.sep.join([ui_sources_path, "icons", 
-                                    "icons8-checkmark (1).svg"])
-icon_run_path = os.path.sep.join([ui_sources_path, "icons", "run_transp.png"])
-icon_close_path = os.path.sep.join([ui_sources_path, "icons", "cerrar_t.PNG"])
+pftracker_path = os.path.dirname(pftracker.__file__)
+#ui_sources_path = pftracker_path.split('__init__.py')[0] + 'ui_sources'
+icons_path = os.path.sep.join([pftracker_path, "ui_sources", "icons"])
+PFT_icon_path = os.path.sep.join([icons_path, "PFT.PNG"])
+icon_acept_path = os.path.sep.join([icons_path, "icons8-checkmark (1).svg"])
+icon_run_path = os.path.sep.join([icons_path, "run_transp.png"])
+icon_close_path = os.path.sep.join([icons_path, "cerrar_t.PNG"])
 
 # specify input and output paths
 execution_path = os.getcwd()
@@ -244,8 +244,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         t_array = np.zeros((i,1))
         fps_array = np.zeros((i,1))
         self.idx = 0
+        self.faceDetect_error = None
         
-        self.pf = particle_tracker(video= self.fileNameSignal, 
+        self.pf = ParticleTracker(video= self.fileNameSignal, 
                                    algorithm = self.algorithm,
                                    n_particles = self.n_particles,
                                    estimate = self.estimate, 
@@ -297,8 +298,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 try:
                     t_elapsed_i, fps_i, video_closed =  self.pf.face_tracking(video_output)                      
                     
-                except AssertionError as faceDetect_error:    
+                except AssertionError as faceDetect_error:   
+                    self.faceDetect_error = faceDetect_error
                     print_face_detection_error(faceDetect_error) 
+                    break
         
                 else:                          
                     # if the video window is closed, break the loop
@@ -312,13 +315,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                         
                     if self.gtFileName != '':
                         # Evaluate particle filter algorithm performance
-                        P_i, R_i, P_mean_i, R_mean_i, P_std_i, R_std_i = self.pf.eval_pf(self.gtFileName)
+                        P_i, R_i, P_mean_i, R_mean_i, P_std_i, R_std_i, _, _ = self.pf.eval_pf(self.gtFileName)
                         
+                        # sum precision and recall of each frame per iteration
                         self.P += P_i
                         self.R += R_i
-                            
+                          
+                        # save mean precision and recall per iteration in two arrays
                         self.P_array[self.idx] = P_mean_i
                         self.R_array[self.idx] = R_mean_i
+                        
+                        # save precision and recall standard deviation per 
+                        # iteration in two arrays
                         P_std_array[self.idx] = P_std_i
                         R_std_array[self.idx] = R_std_i
                             
@@ -346,64 +354,68 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     i -= 1
                     self.idx += 1
             
-            if self.gtFileName != '' and self.outputErrorPath != None:
-                error_output.write("Average precision, recall, elapsed time and "
-                             "fps per iteration:\n")
-                for pt in zip(self.P_array, P_std_array, self.R_array, 
-                              R_std_array, t_array, fps_array):            
-                    error_output.write("%.2f+-%.2f %.2f+-%.2f %.2f %.2f \n" % pt)     
-            
-            if self.outputErrorPath != None:
-                # Close output file
-                error_output.close()
-#            
-            if self.outputName is not None:
-                # Close output file
-                est_output.close()
-            
-            if self.ii == 1 or self.idx == 0:
-                self.t_elapsed, self.fps = t_elapsed_i, fps_i
-                if self.gtFileName != '':
-                    self.P_mean = P_mean_i
-                    self.R_mean = R_mean_i
-            else:
-                t /= self.idx
-                fps /= self.idx
+            if self.faceDetect_error is None:
+                if self.gtFileName != '' and self.outputErrorPath != None:
+                    error_output.write("Average precision, recall, elapsed time and "
+                                 "fps per iteration:\n")
+                    for pt in zip(self.P_array, P_std_array, self.R_array, 
+                                  R_std_array, t_array, fps_array):            
+                        error_output.write("%.2f+-%.2f %.2f+-%.2f %.2f %.2f \n" % pt)     
                 
-                self.t_elapsed, self.fps = t, fps
+                if self.outputErrorPath != None:
+                    # Close output file
+                    error_output.close()
+    #            
+                if self.outputName is not None:
+                    # Close output file
+                    est_output.close()
                 
-                print("\nTotal of full runs: {}".format(self.idx))
-                print("Average time (sec): {:.2f}".format(t))
-                print("Average fps: {:.2f}".format(fps))
-                
-                if self.gtFileName != '':
-                    #precision and recall per iteration
-                    self.P /= self.idx
-                    self.R /= self.idx
+                if self.ii == 1 or self.idx == 0:
+                    self.t_elapsed, self.fps = t_elapsed_i, fps_i
+                    if self.gtFileName != '' and self.idx == 1:
+                        self.P_mean = P_mean_i
+                        self.R_mean = R_mean_i
+                    elif self.idx == 0:    
+                        self.dialog_results.PB_error.setEnabled(False)
+                else:
+                    t /= self.idx
+                    fps /= self.idx
                     
-                    # precision and recall standard deviation
-                    P_std = np.std(self.P_array, dtype=np.float64)
-                    R_std = np.std(self.R_array, dtype=np.float64)
+                    self.t_elapsed, self.fps = t, fps
                     
-                    # precision and recall standard deviation
-                    P_std_perFrame /= self.idx
-                    R_std_perFrame /= self.idx
+                    print("\nTotal of full runs: {}".format(self.idx))
+                    print("Average time (sec): {:.2f}".format(t))
+                    print("Average fps: {:.2f}".format(fps))
                     
-                    self.P_mean = sum(self.P)/len(self.P)
-                    self.R_mean = sum(self.R)/len(self.R)       
-                
-                    print("Average precision +- std per frame/iteration: "
-                          "{:.2f} +- {:.2f}/{:.3f}"
-                          .format(self.P_mean, P_std_perFrame, P_std))
-                    print("Average recall +- std per frame/iteration: "
-                          "{:.2f} +- {:.2f}/{:.3f}"
-                          .format(self.R_mean, R_std_perFrame, R_std))
+                    if self.gtFileName != '':
+                        #precision and recall per iteration
+                        self.P /= self.idx
+                        self.R /= self.idx
+                        
+                        # precision and recall standard deviation
+                        P_std = np.std(self.P_array, dtype=np.float64)
+                        R_std = np.std(self.R_array, dtype=np.float64)
+                        
+                        # precision and recall standard deviation
+                        P_std_perFrame /= self.idx
+                        R_std_perFrame /= self.idx
+                        
+                        self.P_mean = sum(self.P)/len(self.P)
+                        self.R_mean = sum(self.R)/len(self.R)       
                     
-        self.t_elapsed = "{:.2f} seconds".format(self.t_elapsed)
-        self.fps = "{:.2f}".format(self.fps)    
+                        print("Average precision +- std per frame/iteration: "
+                              "{:.2f} +- {:.2f}/{:.3f}"
+                              .format(self.P_mean, P_std_perFrame, P_std))
+                        print("Average recall +- std per frame/iteration: "
+                              "{:.2f} +- {:.2f}/{:.3f}"
+                              .format(self.R_mean, R_std_perFrame, R_std))
         
-        # open results dialog
-        self.openResultsDialog()
+        if self.faceDetect_error is None:            
+            self.t_elapsed = "{:.2f} seconds".format(self.t_elapsed)
+            self.fps = "{:.2f}".format(self.fps)    
+        
+            # open results dialog
+            self.openResultsDialog()
             
              
     def openResultsDialog(self):

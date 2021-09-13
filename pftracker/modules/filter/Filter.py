@@ -10,14 +10,14 @@ from numpy.random import random
 from filterpy.monte_carlo import multinomial_resample, stratified_resample, systematic_resample
 from pftracker.modules.filter.pfAlgorithms import pfiltering
 
-class particlefilter():
+class ParticleFilter():
     """
     Run a particle filter algorithm for an estimation problem.   
 
     This class creates particle filter estimates corresponding to a model class.
     This model class contains the calculation way of methods that vary with each 
     model where to apply particle filter estimations. This model methods are:
-        - initialization: Create intial particles distribution.
+        - initialization: Create initial particles distribution.
         - prediction: Predict next state of the particles.
         - update: Evaluate predicted particles with an observation model.
         - update_apf: Evaluate predicted particles for second stage weights in
@@ -27,24 +27,24 @@ class particlefilter():
         - saveEstimation: Save particle filter estimates into a .txt file.
         - saveOutputModel: Save the visualization produced by visualize method 
           into a file.
-        - getError: Get the particle filter estimation error.
+        - get_error: Get the particle filter estimation error.
+        - get_estimation: Get all the particle filter estimates.
             
-    The particlefilter class interface model class with the PF algorithms and
-    its methods:              
+    The ParticleFilter class interface model class with the PF algorithms and
+    their methods:              
         - filtering: Runs particle filter algorithm.
         - estimate: Returns the expected particle filter estimation. 
-        - get_estimate: Get particle filter estimate by calling the 
-          estimate method.
         - resample: Runs resampling step.
            
     Args:
-        model : Especific model where apply the particle filter estimation                   
+        model : Especific model where to apply the particle filter estimation                   
         algorithm (str): particle filter algorithm to apply
         N (int): Number of particles 
         output (str): Output estimate method 
         resample (str): Resampling method 
         resamplePercent (int): Resampling percent 
-        robustPercent (int, optional): Resampling percent  
+        robustPercent (int, optional): Particles percent to use in the robust 
+            mean estimation algorithm.
     """
     
     def __init__(self, model, algorithm, N, output, resample, resamplePercent, robustPercent=None): 
@@ -138,7 +138,7 @@ class particlefilter():
         """Runs particle filter algorithm.
         
         Args:
-            pf (particlefilter): particlefilter class object
+            pf (ParticleFilter): ParticleFilter class object
             particles (array): particles at time k-1
         
         Returns:
@@ -253,11 +253,6 @@ class particlefilter():
             particles_sort = particles[:, idx_sort[0, :self.N_robust]]
             
             self.estimation = np.sum(particles_sort * weights_norm, axis=1)
-            
-    def get_estimate(self):
-        """Get particle filter estimate by calling the estimate method."""
-        
-        return self.estimation    
     
     def visualize(self, particles):
         """Visualize the estimate resulting from particle filter algorithm.
@@ -298,6 +293,6 @@ class particlefilter():
         return self.model.calc_error(gt_file)
     
     def get_estimation(self):
-        """Get particle filter estimation."""
+        """Get all the particle filter estimates."""
         return self.model.getEstimation()
         

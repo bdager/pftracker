@@ -11,9 +11,9 @@ def error(det_tuple, gt_file):
     """2D face tracking evaluation.
     
     This function reads ground truth annotations of bounding box from .txt 
-    files and then calculates precision and recall error metrics between 
-    detections that have been obtained from particle filter estimation and 
-    ground truth annotations.
+    files and then calculates precision, recall and F1-score error metrics 
+    between detections that have been obtained from particle filter estimation
+    and ground truth annotations.
     
     Ground truth annotations shoud be in the format: 
         - x,y,w,h
@@ -33,7 +33,7 @@ def error(det_tuple, gt_file):
         gt_file(str): .txt file directory of ground truth annotations 
     
     Returns:
-         6-element tuple containing
+         8-element tuple containing
             
          - **P** (*array*): precision value per frame, array with 
            (1, number_of_frames) dimension  
@@ -43,6 +43,8 @@ def error(det_tuple, gt_file):
          - **R_mean** (*float*): recall mean value  
          - **P_std** (*float*): precision standard deviation value
          - **R_std** (*float*): recall standard deviation value
+         - **F1Score_mean** (*float*): F-1-score mean metric
+         - **F1Score_std** (*float*): F-1-score standard deviation value
     """
 
     det = np.zeros((len(det_tuple), 4)).astype(int)
@@ -65,11 +67,13 @@ def error(det_tuple, gt_file):
         gt[i, 2:] = gt_temp[i, 0:2] + gt_temp[i, 2:]//2    
     gtFile.close()   
     
-    # compute precision and recall metrics
-    P, R = calc_PrecRecall(det, gt)
-    
-    P = P.astype(float)
-    R = R.astype(float)
+    # compute precision, recall and F1-score metrics
+    P, R, F1Score = calc_PrecRecall(det, gt)
+#    print(type(P[0]))
+#    P = P.astype(float)
+#    R = R.astype(float)
+#    print(type(P[0]))
+#    print(P[0])
     
     # precision and recall average
     P_mean = np.sum(P)/len(P)
@@ -78,6 +82,12 @@ def error(det_tuple, gt_file):
     # precision and recall standard deviation
     P_std = np.std(P, dtype=np.float64)
     R_std = np.std(R, dtype=np.float64)
+    
+    # F1-score average
+    F1Score_mean = np.sum(F1Score)/len(F1Score)
+    
+    # precision and recall standard deviation
+    F1Score_std = np.std(F1Score, dtype=np.float64)
 
-    return P, R, P_mean, R_mean, P_std, R_std
+    return P, R, P_mean, R_mean, P_std, R_std, F1Score_mean, F1Score_std
     

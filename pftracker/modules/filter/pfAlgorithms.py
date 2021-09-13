@@ -261,7 +261,7 @@ class pfiltering():
         constitute the best representation of the set of predicted 
         samples at time k. 
         
-        Second stage weights use this information 
+        Second stage weights uses this information 
         to resample particles (x_{k-1}) at time k-1, propagate them 
         to time k and calculate the likelihoods. Final weights are
         obtained dependent on the actual likelihoods and the likelihood 
@@ -284,6 +284,7 @@ class pfiltering():
                            
         # calculate first stage weights w_{k}^{i} with u_{k}^{i}
         w1 = self.w * likelihood_uk
+#        w1 = self.w * likelihood_uk + 1e-7
             
         # normalize weights
         w1 /= np.sum(w1)              
@@ -304,9 +305,12 @@ class pfiltering():
         # w = p(z_{k}|x_{k}^{idx}) / p(z_{k}|u-{k})
         for i in range(self.N):
             if w1[:,i] == 0:
-                self.w[:,i] = self.N
+                self.w[:,i] = self.N 
+#                self.w[:,i] = self.w[:,i] + 1e-7
             else:
-                self.w[:,i] = likelihood_xk[:,i] / likelihood_uk[:,i]      
+                self.w[:,i] = likelihood_xk[:,i] / likelihood_uk[:,i] 
+        
+#        self.w = likelihood_xk / likelihood_uk
             
         # normalize weights
         self.w /= np.sum(self.w)    

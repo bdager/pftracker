@@ -313,7 +313,7 @@ class FaceTracking_2D():
             gt (str): path to ground truth .txt file  
             
         Returns:
-            6-element tuple containing
+            8-element tuple containing
             
             - **P** (*array*): precision value per frame, array with 
               (1, number_of_frames) dimension  
@@ -323,11 +323,14 @@ class FaceTracking_2D():
             - **R_mean** (*float*): recall mean value  
             - **P_std** (*float*): precision standard deviation value
             - **R_std** (*float*): recall standard deviation value
+            - **F1Score** (*float*): F-1-score metric
+            - **F1Score_std** (*float*): F-1-score standard deviation value
         """
         
         det_tuple = self.track
-        P, R, P_mean, R_mean, P_std, R_std = error(det_tuple, gt_file)
-        return P, R, P_mean, R_mean, P_std, R_std
+#        P, R, P_mean, R_mean, P_std, R_std, F1Score, F1Score_mean = error(det_tuple, gt_file)
+#        return P, R, P_mean, R_mean, P_std, R_std, F1Score, F1Score_mean
+        return error(det_tuple, gt_file)
                        
             
     def close_e(self, ended): 

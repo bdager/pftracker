@@ -19,7 +19,7 @@ class lbpModel():
         N (int): number of particles
     """
     def __init__(self, roi, N):           
-        self.lbpHistCalc = LBPHistogram(numPoints=8, radius=8)
+        self.lbpHistCalc = LBPHistogram(numPoints=8, radius=8) #24,8; 8,4;
         self.hist_ref = self.lbpHistCalc.calc_Hist(roi)
         self.N = N
         self.distances = np.zeros((1, self.N))
@@ -42,6 +42,7 @@ class lbpModel():
         # Results are better with a fixed scale between 10 and 40,
         # a bigger number of pixels will take more execution time
         s=20 
+#        s=25
         
         # loop over the particles
         for iPart in range(self.N):
@@ -52,17 +53,22 @@ class lbpModel():
             maxX = np.around(np.min((particles[0,iPart]+s, image.shape[1]))).astype(int)
   
             roi = image[minY:maxY, minX:maxX, :]
-#            gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
             LBPhist = self.lbpHistCalc.calc_Hist(roi)
             
             # calculate Alternative CHI Square distance (use especifically for 
             # LBP histograms comparison)
+#            chi_square = np.sum((self.hist_ref - LBPhist)**2 / (self.hist_ref + LBPhist))
             chi_square = 2 * np.sum((self.hist_ref - LBPhist)**2 / (self.hist_ref + LBPhist))
-#            chi_square = 0.5 * np.sum((self.hist_ref - LBPhist)**2 / (self.hist_ref + LBPhist + 1e-10)))
+#            chi_square = 0.5 * np.sum((self.hist_ref - LBPhist)**2 / (self.hist_ref + LBPhist + 1e-10))
             self.distances[0, iPart] = chi_square
     
         # calculate the likelihood  
-        sigma = 0.06   # 0.01; 0.05; 0.06; 0.08
+#        sigma = 0.05   # 0.01; 0.05; 0.06; 0.08
+        sigma = 0.06
+#        sigma = 0.04
+#        sigma = 0.01
+#        sigma = 0.008
+#        likelihood = np.exp(-self.distances**2/(2*sigma**2))
         likelihood = 1/np.sqrt(2*np.pi*sigma**2) * np.exp(-self.distances**2/(2*sigma**2))
         
         return likelihood

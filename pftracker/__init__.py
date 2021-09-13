@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Copyright 2021 Bessie Domínguez Dáger
+"""Copyright 2021 Bessie Domínguez-Dáger
 
 pftracker library:
 http://github.com/bdager/pftracker

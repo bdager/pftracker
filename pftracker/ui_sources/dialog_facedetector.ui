@@ -92,7 +92,7 @@
      <item>
       <widget class="QPushButton" name="PB_acept">
        <property name="text">
-        <string>Acept</string>
+        <string>Accept</string>
        </property>
       </widget>
      </item>

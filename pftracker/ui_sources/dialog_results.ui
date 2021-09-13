@@ -267,7 +267,6 @@
      <zorder>label_robustMean1</zorder>
      <zorder>label_robustMean</zorder>
      <zorder>label_runs</zorder>
-     <zorder>label_runs</zorder>
      <zorder>label_resultRuns</zorder>
     </widget>
    </item>
@@ -315,7 +314,7 @@
      <item>
       <widget class="QPushButton" name="PB_acept">
        <property name="text">
-        <string>Acept</string>
+        <string>Accept</string>
        </property>
       </widget>
      </item>

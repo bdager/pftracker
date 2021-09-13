@@ -4,7 +4,7 @@ This section presents the descriptions of modules, classes and methods that hand
 
 trackUI module
 #################
-This module runs the particle filter toolbox. It contain the classes:
+This module runs the graphical interface. It contain the classes:
  
 .. autoclass:: trackUI.Dialog_results
    :members:
@@ -20,17 +20,17 @@ This module runs the particle filter toolbox. It contain the classes:
 
 track module
 ##############
-This module does the same as the graphical interface but like a regular pyhton module, not an graphical interface.
+This module does the same as the graphical interface but as a Python package.
 
 .. autoclass:: pftracker.track.Track
    :members:
 
 Interfacing UI
 ##############
-.. autoclass:: pftracker.modules.interfacingUI.particle_tracker
+.. autoclass:: pftracker.modules.interfacingUI.ParticleTracker
    :members:
    
 Running filter
 ##############
-.. autoclass:: pftracker.modules.runFilter.run_filter
+.. autoclass:: pftracker.modules.runFilter.RunFilter
    :members:

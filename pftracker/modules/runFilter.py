@@ -7,12 +7,16 @@ interface.
 """
 
 from imutils.video import FPS 
-from pftracker.modules.filter import particlefilter
+from pftracker.modules.filter import ParticleFilter
 
-class run_filter():    
+class RunFilter():    
     """
     Run an especific particle filter algorithm for the estimation problem in
     video sequences.
+    
+    This is a general class that can be run for solving any PF estimation 
+    problem as well as the ParticleFilter class. Its whole structure is
+    based on ParticleFilter class callings.
     
     Args:
         model: Object of class describing the especific model where apply the 
@@ -37,7 +41,7 @@ class run_filter():
         self.robustPercent = robustPercent             
         
         ## Initializations
-        self.pf = particlefilter(self.model, self.algorithm, self.N,
+        self.pf = ParticleFilter(self.model, self.algorithm, self.N,
                                  self.estimate, self.resample, 
                                  self.resamplePercent, self.robustPercent)
         self.particles = self.pf.initialization()           

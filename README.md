@@ -1,7 +1,6 @@
 # Particle Filter Toolbox
 
-> Particle Filter graphical interface for face tracking in video 
-sequences.
+> Particle Filter for face tracking in video sequences.
 
 This is a Python framework implemented for 
 perfoming face tracking with particle filter algorithms. It cointains 

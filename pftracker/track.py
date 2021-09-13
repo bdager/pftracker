@@ -6,7 +6,7 @@ This module implements top-level of pftracker module.
 
 import numpy as np
 from pftracker.modules.metrics.plotError import plotE, plotE_average
-from pftracker.modules.interfacingUI import particle_tracker
+from pftracker.modules.interfacingUI import ParticleTracker
 
 class Track():
     """
@@ -116,8 +116,8 @@ class Track():
         if video != None:
             error_text = ("Path to the input video file should contain "
                           ".mp4 or .avi extension at the end.\n"
-                          "\tExample: Track(video=\"pftracker\input"
-                          "\Aaron_Guiel\Aaron_Guiel5.avi\")")       
+                          "\t\t\t\tExample: Track(video=\"pftracker\input"
+                          "\Aaron_Guiel\Aaron_Guiel5.avi\")") 
             avi_file = "avi" == video.split(".")[-1] 
             mp4_file = "mp4" == video.split(".")[-1]  
             assert (avi_file or mp4_file), error_text
@@ -153,8 +153,9 @@ class Track():
             gt(str, optional): Path to the ground truth file. Without this
                 file is not posible to calculate precision and recall error
                 metrics. Default is None
-            errorFile(str, optional): Path to a .txt file for saving precision
-                and recall error metrics. Default is None (do not save error).
+            errorFile(str, optional): Path to a .txt file for saving precision,
+                recall and F1-score error metrics. Default is None (do not save
+                error).
                 
                 **Example**
                 
@@ -225,17 +226,21 @@ class Track():
         i = iterations
         self.ii = iterations
         t, fps = 0, 0
-        self.P, self.R, self.P_mean, self.R_mean = 0,0,0,0
-        P_std_perFrame, R_std_perFrame = 0.0, 0.0
+        self.P, self.R, self.P_mean, self.R_mean = 0,0,0,0        
+        P_std_perFrame, R_std_perFrame, F1Score_std_perFrame = 0.0, 0.0, 0.0
         self.P_array = np.zeros((i,1))
         self.R_array = np.zeros((i,1))
         P_std_array = np.zeros((i,1))
         R_std_array = np.zeros((i,1))
+        F1Score_std_array = np.zeros((i,1))
         t_array = np.zeros((i,1))
         fps_array = np.zeros((i,1))
+#        self.F1Score = 0.0
+        self.F1Score_array = np.zeros((i,1))
         self.idx = 0
+        self.plot = True
         
-        pf = particle_tracker(video = self.video, algorithm = self.algorithm,
+        pf = ParticleTracker(video = self.video, algorithm = self.algorithm,
                               n_particles = self.n_particles, detector = self.detector,
                               estimate = self.estimate, resample = self.resample, 
                               resamplePercent = self.resamplePercent, 
@@ -310,8 +315,7 @@ class Track():
                 t_i, fps_i, video_closed = pf.face_tracking(video_output)   
             
                 # if the video window is closed, break the loop
-                if video_closed.args[0] == "video closed":                    
-                   
+                if video_closed.args[0] == "video closed":             
                     break
                     
                 t += t_i
@@ -320,45 +324,62 @@ class Track():
                 fps_array[self.idx] = fps_i
                                         
                 if gt != None:
-                    P_i, R_i,P_mean_i,R_mean_i,P_std_i,R_std_i = pf.eval_pf(gt)
-                        
-                    self.P += P_i
-                    self.R += R_i
+                    # Evaluate particle filter algorithm performance
+                    P_i, R_i,P_mean_i,R_mean_i,P_std_i,R_std_i, F1Score_i, F1Score_std_i = pf.eval_pf(gt)
                     
+                    # sum precision and recall of each frame per iteration
+                    self.P += P_i
+                    self.R += R_i             
+                    
+                    # save mean precision and recall per iteration in two arrays
                     self.P_array[self.idx] = P_mean_i
                     self.R_array[self.idx] = R_mean_i
+                    
+                    # save precision and recall standard deviation per 
+                    # iteration in two arrays
                     P_std_array[self.idx] = P_std_i
                     R_std_array[self.idx] = R_std_i
                     
+                    # save F1-score and its standard deviation per iteration 
+                    # in two arrays
+                    self.F1Score_array[self.idx] = F1Score_i
+                    F1Score_std_array[self.idx] = F1Score_std_i                    
+                    
+                    # save mean precision, recall and F1-score per frame 
                     P_std_perFrame += P_std_i
                     R_std_perFrame += R_std_i
+                    F1Score_std_perFrame += F1Score_std_i
                     
                     print("[INFO] approx. precision: {:.2f} +- {:.2f}"
                           .format(P_mean_i, P_std_i))
                     print("[INFO] approx. recall: {:.2f} +- {:.2f}"
                           .format(R_mean_i, R_std_i))
+                    print("[INFO] approx. F1-score: {:.2f} +- {:.2f}"
+                          .format(F1Score_i, F1Score_std_i))
                     
                     if errorFile != None:
                         # Write tracking error as P R          
                         for pt in zip(P_i, R_i):            
-                            error_output.write("%.2f %.2f \n" % pt)         
-                            error_output.write("\n")
+                            error_output.write("%.2f %.2f\n" % pt)         
+                        error_output.write("\n")
                     
                 if saveTrackFile != None:
                     track = pf.get_pf_est()
                     # Write track points as x, y, w, w          
                     for pt in track:            
-                        est_output.write("%.2f %.2f %.2f %.2f \n" % pt) 
+                        est_output.write("%.2f %.2f %.2f %.2f\n" % pt) 
                     est_output.write("\n")
                 
                 i -= 1
                 self.idx += 1
             
             if gt != None and errorFile != None:
-                error_output.write("Average precision, recall, elapsed time and "
-                             "fps per iteration:\n")
-                for pt in zip(self.P_array, P_std_array, self.R_array, R_std_array, t_array, fps_array):            
-                    error_output.write("%.2f+-%.2f %.2f+-%.2f %.2f %.2f \n" % pt)     
+                error_output.write("Average precision, recall, F1-score, "
+                             "elapsed time and fps per iteration:\n")
+                for pt in zip(self.P_array, P_std_array, self.R_array, 
+                              R_std_array, self.F1Score_array, 
+                              F1Score_std_array, t_array, fps_array):            
+                    error_output.write("%.2f+-%.2f %.2f+-%.2f %.2f+-%.2f %.2f %.2f\n" % pt)                  
             
             if errorFile != None:
                 # Close output file
@@ -369,9 +390,11 @@ class Track():
                 est_output.close()
             
             if self.ii == 1 or self.idx == 0:
-                if gt != None:
+                if gt != None and self.idx == 1:
                     self.P_mean = P_mean_i
                     self.R_mean = R_mean_i
+                elif self.idx == 0: 
+                    self.plot = False
             else:
                 t /= self.idx
                 fps /= self.idx
@@ -381,27 +404,36 @@ class Track():
                 print("Average fps: {:.2f}".format(fps))
                 
                 if gt != None:
-                    #precision and recall per iteration
+                    # mean precision and recall per frame 
                     self.P /= self.idx
-                    self.R /= self.idx
+                    self.R /= self.idx                  
                     
-                    # precision and recall standard deviation
-                    P_std = np.std(self.P_array, dtype=np.float64)
-                    R_std = np.std(self.R_array, dtype=np.float64)
-                    
-                    # precision and recall standard deviation
+                    # precision and recall standard deviation per frame
                     P_std_perFrame /= self.idx
                     R_std_perFrame /= self.idx
                     
+                    F1Score_std_perFrame /= self.idx
+                    
+                    # precision and recall standard deviation per iteration
+                    P_std = np.std(self.P_array, dtype=np.float64)
+                    R_std = np.std(self.R_array, dtype=np.float64)
+                    
+                    # mean precision and recall of the total number of iterations
                     self.P_mean = sum(self.P)/len(self.P)
-                    self.R_mean = sum(self.R)/len(self.R)       
-                
+                    self.R_mean = sum(self.R)/len(self.R)   
+    
+                    F1Score_mean = sum(self.F1Score_array)/len(self.F1Score_array)
+                    F1Score_std = np.std(self.F1Score_array, dtype=np.float64)
+                                    
                     print("Average precision +- std per frame/iteration: "
-                          "{:.2f} +- {:.2f}/{:.3f}"
+                          "{:.2f} +- {:.2f}/{:.2f}"
                           .format(self.P_mean, P_std_perFrame, P_std))
                     print("Average recall +- std per frame/iteration: "
-                          "{:.2f} +- {:.2f}/{:.3f}"
+                          "{:.2f} +- {:.2f}/{:.2f}"
                           .format(self.R_mean, R_std_perFrame, R_std))
+                    print("Average F1-score: +- std per frame/iteration: "
+                          "{:.2f} +- {:.2f}/{:.2f}"
+                          .format(F1Score_mean[0], F1Score_std_perFrame, F1Score_std))
                     
 
     def plotError(self):
@@ -411,12 +443,16 @@ class Track():
         was provided. If the number of algorithm runs if bigger than one, then
         precision and recall are plotted per particle filter algorithm run too.
         """
-        try:
-            # plot error
-            plotE(self.P, self.R, self.P_mean, self.R_mean)
-            if self.idx != 1:
-                plotE_average(self.P_array, self.R_array, self.P_mean, self.R_mean)
-        except TypeError:
-            print("There is no ground truth file provided for ploting "
-                  "precision and recall error metrics.")
+        if not self.plot:
+            print("It´s not possible to plot the error because the pf "
+                  "algorithm has to perform a full run at list once")
+        else:
+            try:
+                # plot error
+                plotE(self.P, self.R, self.P_mean, self.R_mean)
+                if self.idx != 1:
+                    plotE_average(self.P_array, self.R_array, self.P_mean, self.R_mean)
+            except TypeError:
+                print("There is no ground truth file provided for ploting "
+                      "precision and recall error metrics.")
         

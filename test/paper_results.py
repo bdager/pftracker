@@ -4,17 +4,29 @@ Getting paper results
 
 @author: Bessie Domínguez-Dáger
 """
-
+import os
 from pftracker.track import Track
+import numpy as np
 
-input_video = "pftracker\input\Aaron_Guiel\Aaron_Guiel5.avi"
-gt_file = "pftracker\input\Aaron_Guiel\Aaron_Guiel5.labeled_faces.txt"
+# set the seed of the random number generator 
+np.random.seed(1267)
+
+# get the input data file location
+test_file_path = os.path.dirname(os.path.realpath(__file__))
+input_path = test_file_path[:test_file_path.rfind('test')] + 'input'
+Aaron_file = os.path.sep.join([input_path, 'Aaron_Guiel'])
+
+# change the root to Aaron_Guiel5.avi and Aaron_Guiel5.labeled_faces.txt
+# files if you have them in another location
+input_video = os.path.sep.join([Aaron_file, "Aaron_Guiel5.avi"])
+gt_file = os.path.sep.join([Aaron_file, "Aaron_Guiel5.labeled_faces.txt"])
 
 
 def pf_run(pf_algorithm='G_PF', N = 100, resampling_alg ='systematic',
            face_detector = 'CaffeModel', res_percent = 50,
            estimate_alg = 'weighted_mean', RM_percent = 20, 
-           ss ='6_variables', obs_model = 'HSV color-based'):
+           ss ='6_variables', obs_model = 'HSV color-based',
+           plot = False):
     
     # create a pftracker object
     pf = Track(video = input_video, n_particles = N, 
@@ -26,9 +38,9 @@ def pf_run(pf_algorithm='G_PF', N = 100, resampling_alg ='systematic',
     # perform face tracking based on PF
     pf.run(iterations=40, gt=gt_file)
     
-    # comment/uncomment this for getting the plots
     # plot precision and recall error metrics per frame and iteration
-    pf.plotError() 
+    if plot:
+        pf.plotError() 
 
 
 def get_results():
@@ -74,7 +86,7 @@ def get_results():
           "\tstate space dimension: 6 variables,\n"
           "\tobservation model: HSV color-based)\n")
         
-    pf_run(pf_algorithm = 'SIR')
+    pf_run(pf_algorithm = 'SIR', plot = True)
     
     #-----------------------------------------------------------------
     ## GPF 
@@ -99,7 +111,7 @@ def get_results():
           "\tstate space dimension: 6 variables,\n"
           "\tobservation model: HSV color-based)\n")
         
-    pf_run()
+    pf_run(plot = True)
     
     #-----------------------------------------------------------------
     ## GPF with different parameters
@@ -203,7 +215,7 @@ def get_results():
     # Number of particles = 300  
     
     print("\nGPF with different parameters:\n"
-          "\tnumber of particles: 300,\n")
+          "\tnumber of particles: 300\n")
     
     pf_run(N = 300)
     
@@ -231,7 +243,7 @@ def get_results():
     print("\nGPF with different parameters:\n"
           "\tstate space dimension: 4 variables with self updating bounding box\n")
     
-    pf_run(ss = 'dynamic_bbox')
+    pf_run(ss = 'dynamic_bbox', plot = True)
     
     #-----------------------------------------------------------------
     # Five variables model
@@ -289,7 +301,7 @@ def get_results():
           "\tstate space dimension: 6 variables,\n"
           "\tobservation model: HSV color-based)\n")
     
-    pf_run(pf_algorithm = 'APF')    
+    pf_run(pf_algorithm = 'APF', plot = True)    
     #-----------------------------------------------------------------
 
 if __name__ == '__main__':

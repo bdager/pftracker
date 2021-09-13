@@ -16,10 +16,10 @@ from pftracker.modules.models import ObsMod
 from pftracker.modules.models.colorhist.HSVModel import hsvModel
 from pftracker.modules.models.lbp.LBPModel import lbpModel
 
-from pftracker.modules.runFilter import run_filter
+from pftracker.modules.runFilter import RunFilter
    
 
-class particle_tracker(): 
+class ParticleTracker(): 
     """Class interfaces particle filter to handle face tracking problem.
     
     This class interfaces particle filter algorithms to work in the 
@@ -154,12 +154,12 @@ class particle_tracker():
         # Read first frame
         frame = v.read()
         
-        # If the first frame coudn´t be read raise an error to explain it
+        # If the first frame couldn´t be read raise an error to explain it
         # webcam reference
         webcam_error = not(frame is None and self.video is None)
         assert webcam_error, "The reference to the webcam has failed." 
         
-        # If the first frame coudn´t be read raise an error to explain it
+        # If the first frame couldn´t be read raise an error to explain it
         # video file reference
         video_file_error = not(frame[1] is None and self.video is not None)
         error_text = ("Incorrect path to the input video file.\n"  +
@@ -191,7 +191,7 @@ class particle_tracker():
         faceModel = FaceTracking_2D(movModel, obsModel, self.n_particles, size_ve, 
                                     frame, self.detector, v, video_stream, saveVideo)                                     
         # Initialize run_filter class
-        self.run = run_filter(faceModel, self.algorithm, self.n_particles, 
+        self.run = RunFilter(faceModel, self.algorithm, self.n_particles, 
                          self.estimate, self.resample, self.resamplePercent, 
                          self.robustPercent)                                                            
        
@@ -219,8 +219,7 @@ class particle_tracker():
         
         Args:
             file_name(str): path to output .txt file                 
-        """
-        
+        """        
         self.run.save_estimate(file_name)
         
     def eval_pf(self, gt):
@@ -234,7 +233,7 @@ class particle_tracker():
             gt(str): path to ground truth .txt file  
             
         Returns:
-            6-element tuple containing
+            8-element tuple containing
             
             - **P** (*array*): precision value per frame, array with 
               (1, number_of_frames) dimension  
@@ -244,8 +243,8 @@ class particle_tracker():
             - **R_mean** (*float*): recall mean value 
             - **P_std** (*float*): precision standard deviation value
             - **R_std** (*float*): recall standard deviation value
-        """
-        
+            - **F1Score** (*float*): F-1-score metric
+        """        
         return self.run.eval_alg(gt)
          
     def get_pf_est(self):

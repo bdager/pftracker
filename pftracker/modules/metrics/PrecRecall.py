@@ -9,19 +9,21 @@ import numpy as np
 
 def calc_PrecRecall(det, gt):
     """
-    Compute Precision and Recall metrics for rectangular bounding boxes.
+    Compute Precision, Recall and F1-score metrics for rectangular bounding boxes.
      
     Args:
         det (array): detection vector bounding box [startX startY endX endY]
         gt (array): ground truth vector bounding box [startX startY endX endY]
        
     Returns:
-         2-element tuple containing
+         3-element tuple containing
             
          - **precision** (*array*): precision value per frame, array with 
            (1, number_of_frames) dimension  
-         - **R** (*array*): recall value per frame, array with 
-           (1, number_of_frames) dimension         
+         - **recall** (*array*): recall value per frame, array with 
+           (1, number_of_frames) dimension  
+         - **F1Score** (*array*): F-1-score metric per frame, array with 
+           (1, number_of_frames) dimension  
     """
     
     # initialize an array for saving gt and det intersected region 
@@ -57,5 +59,9 @@ def calc_PrecRecall(det, gt):
     # A(gt intersect det) / A(gt)
     gtArea =  wh_gt[:,0] * wh_gt[:,1]
     recall = TPArea / gtArea
+    
+    # for comparing precision/recall values      
+    eps = 1e-7
+    F1Score = 2 * precision*recall / (precision+recall+eps)
 
-    return precision, recall
+    return precision, recall, F1Score
