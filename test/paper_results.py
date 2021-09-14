@@ -13,7 +13,7 @@ np.random.seed(1267)
 
 # get the input data file location
 test_file_path = os.path.dirname(os.path.realpath(__file__))
-input_path = test_file_path[:test_file_path.rfind('test')] + 'input'
+input_path = test_file_path[:test_file_path.rfind('test')] + 'pftracker' + 'input'
 Aaron_file = os.path.sep.join([input_path, 'Aaron_Guiel'])
 
 # change the root to Aaron_Guiel5.avi and Aaron_Guiel5.labeled_faces.txt
